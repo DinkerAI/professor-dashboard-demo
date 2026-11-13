@@ -53,7 +53,7 @@ The visible disclosure must remain in any public deployment:
 
 ## Local development
 
-Requirements: Node.js 20 or later.
+Requirements: Node.js 22.12 or later.
 
 ```bash
 npm install

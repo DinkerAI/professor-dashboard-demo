@@ -4,6 +4,9 @@
   "private": true,
   "description": "Fictional-data reconstruction of the Peak Pickleball Professor Dashboard instructor workflow.",
   "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "check": "node --check src/index.js && node --check public/assets/demo.js && node scripts/validate.mjs && wrangler deploy --dry-run --outdir .wrangler-dry-run",
     "dev": "wrangler dev",
