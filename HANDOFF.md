@@ -1,80 +1,71 @@
-# Portfolio-agent handoff
+# Portfolio and Cloudflare handoff
 
-## What this is
-
-`professor-dashboard-demo` is a buildless static web experience that reconstructs
-the professor-facing scheduling workflow with fictional data. It is technically
-self-contained and contains no credentials or live operational data. It does not
-contact CourtReserve, DinkerAI services, or any other external endpoint. Final
-publication of Peak branding and workflow descriptions remains the portfolio
-owner's decision.
-
-## Preferred integration
-
-Copy this entire directory into the portfolio site's public/static assets and
-serve it at a stable route such as:
+## Repository
 
 ```text
-/demos/professor/
+https://github.com/DinkerAI/professor-dashboard-demo
 ```
 
-Link to that route from the Peak Pickleball portfolio section. The standalone
-page includes its own context and disclosure.
+This is a Cloudflare Worker project with static assets in `public/`. It is
+technically self-contained and contains no credentials or live operational data.
+Final publication of Peak branding and workflow descriptions remains the
+portfolio owner's decision.
 
-If the host does not automatically serve directory index files, link directly to:
+## Preferred public setup
+
+Connect this repository to **Cloudflare Workers Builds** and deploy the `main`
+branch. The project name must remain `professor-dashboard-demo` unless the
+`name` field in `wrangler.jsonc` is updated to match.
+
+Initial URL:
 
 ```text
-/demos/professor/index.html
+https://professor-dashboard-demo.<cloudflare-account>.workers.dev
 ```
+
+Preferred custom domain:
+
+```text
+https://professor.forwardcanon.com
+```
+
+Once the live URL exists, add it to `README.md` and use it as the portfolio link.
 
 ## Optional iframe integration
 
-For an embedded presentation, load:
-
-```text
-/demos/professor/index.html?embed=1
-```
-
-Suggested minimum iframe size:
+Use the live URL with `?embed=1`:
 
 ```html
 <iframe
-  src="/demos/professor/index.html?embed=1"
+  src="https://professor.forwardcanon.com/?embed=1"
   title="Interactive Professor Dashboard portfolio demo"
   loading="lazy"
   style="width:100%;min-height:900px;border:0"
 ></iframe>
 ```
 
-The host page should add an “Open full demo” link for mobile visitors and users
-who prefer a separate page.
+The deployed `_headers` policy permits framing from `forwardcanon.com` and
+`www.forwardcanon.com`. Keep an “Open full demo” link for mobile visitors and
+users who prefer a separate page.
 
-## Files that must stay together
+## Required public files
 
-```text
-index.html
-assets/demo.css
-assets/demo.js
-assets/peak-mark.svg
-data/demo.json
-```
-
-`README.md` and this file are documentation and do not need to be publicly served.
+Cloudflare serves the entire `public/` directory. Do not move individual assets
+out of it without updating their relative paths and `wrangler.jsonc`.
 
 ## Integration constraints
 
-- Preserve the relative directory structure.
-- Serve the files over HTTP(S); `fetch()` will not load the JSON reliably from a
-  local `file://` URL.
-- Do not replace the fictional data with real instructor or class information.
-- Do not add credentials, API URLs, analytics identifiers, or CourtReserve calls.
 - Keep the visible “Portfolio demo” disclosure.
-- The demo stores no data. Reloading the page resets it.
+- Do not replace fictional data with real instructor or class information.
+- Do not add credentials or CourtReserve secrets to browser code or Git.
+- Keep external integrations behind server-side Worker routes.
+- The demo stores no data; reload and **Reset demo** return the initial state.
+- Run `npm run check` before merging a deployment change.
 
-## Suggested link copy
+## Suggested portfolio copy
 
 **Explore the Professor Dashboard demo**
 
-Instructor-side scheduling reconstructed with fictional data. External assignment
-sync is intentionally disabled.
-
+Instructor-side scheduling reconstructed with fictional data. Test the class
+selection and urgent coverage workflow directly in your browser; external
+assignment sync is intentionally disabled.

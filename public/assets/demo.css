@@ -119,6 +119,25 @@ button {
   font-size: 0.78rem;
 }
 
+.source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px;
+  color: #dff7e9;
+  border: 1px solid rgba(137, 220, 179, 0.38);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.source-link:hover {
+  color: #ffffff;
+  background: rgba(137, 220, 179, 0.1);
+  border-color: rgba(137, 220, 179, 0.7);
+}
+
 .demo-wrap {
   padding-bottom: 60px;
 }
@@ -726,6 +745,10 @@ button.event-card:hover {
 }
 
 .site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 24px;
   padding: 0 0 50px;
   color: #8e9b94;
   font-size: 0.75rem;
@@ -734,6 +757,11 @@ button.event-card:hover {
 .site-footer p {
   max-width: 760px;
   margin: 0;
+}
+
+.site-footer a {
+  color: #b7c7be;
+  text-underline-offset: 3px;
 }
 
 body.is-embed {
@@ -849,4 +877,3 @@ body.is-embed .demo-shell {
     transition-duration: 0.01ms !important;
   }
 }
-
