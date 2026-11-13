@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A fictional-data reconstruction of the professor-facing Peak Pickleball scheduling workflow."
+    />
+    <meta name="color-scheme" content="light" />
+    <title>Professor Dashboard — Portfolio Demo</title>
+    <link rel="stylesheet" href="assets/demo.css" />
+    <script src="assets/demo.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#demo-app">Skip to demo</a>
+
+    <header class="site-header" data-standalone-only>
+      <div class="site-header__inner">
+        <div class="project-kicker">Peak Pickleball · Professor Dashboard</div>
+        <h1>The professor-side scheduling experience.</h1>
+        <p>
+          An interactive reconstruction of the workflow instructors used to review,
+          select, and manage classes. The production integration is intentionally absent.
+        </p>
+        <div class="project-facts" aria-label="Demo facts">
+          <span>Fictional people and classes</span>
+          <span>No sign-in required</span>
+          <span>No external services</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="demo-app" class="demo-wrap">
+      <section class="demo-shell" aria-labelledby="dashboard-title">
+        <div class="demo-disclosure" role="note">
+          <span class="demo-disclosure__signal" aria-hidden="true"></span>
+          <p>
+            <strong>Portfolio demo</strong>
+            Fictional data · CourtReserve assignment sync disabled
+          </p>
+          <button id="reset-demo" class="text-button" type="button">Reset demo</button>
+        </div>
+
+        <header class="product-header">
+          <div class="brand-lockup">
+            <img src="assets/peak-mark.svg" alt="" class="brand-mark" />
+            <div>
+              <div class="brand-name">PEAK PICKLEBALL</div>
+              <h2 id="dashboard-title">Professor Dashboard</h2>
+            </div>
+          </div>
+          <div class="connection-pill" aria-label="Demo connection status">
+            <span aria-hidden="true"></span>
+            Demo mode · offline
+          </div>
+        </header>
+
+        <div id="demo-alert" class="demo-alert" aria-live="polite" aria-atomic="true"></div>
+
+        <section class="goal-card" aria-labelledby="progress-title">
+          <div class="goal-card__header">
+            <div>
+              <p class="eyebrow">Monthly teaching progress</p>
+              <h3 id="progress-title">Welcome back, <span id="profile-first-name">Professor</span>.</h3>
+              <div class="user-line">
+                <span id="profile-name">Demo Instructor</span>
+                <span aria-hidden="true">·</span>
+                <span id="profile-tier" class="tier-badge">Instructor</span>
+              </div>
+            </div>
+            <div class="goal-number" aria-label="Monthly progress">
+              <strong id="progress-count">0</strong>
+              <span>/ <span id="progress-target">0</span> points</span>
+            </div>
+          </div>
+
+          <div
+            class="progress-track"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="5"
+            aria-valuenow="0"
+            aria-label="Monthly teaching points"
+          >
+            <span id="progress-fill"></span>
+          </div>
+
+          <div class="goal-card__footer">
+            <span id="progress-status">Loading progress…</span>
+            <span id="progress-rollover">Rollover 0/0</span>
+            <details class="rules-popover">
+              <summary>Class rules</summary>
+              <ul id="rules-list"></ul>
+            </details>
+          </div>
+        </section>
+
+        <div class="action-row">
+          <nav id="view-tabs" class="view-tabs" aria-label="Class views"></nav>
+          <button id="primary-action" class="primary-button" type="button" disabled>
+            Confirm selected
+          </button>
+        </div>
+
+        <section id="dashboard-view" class="dashboard-view" aria-live="polite"></section>
+      </section>
+    </main>
+
+    <footer class="site-footer" data-standalone-only>
+      <p>
+        This reconstruction demonstrates the instructor experience only. It does not
+        authenticate users, store personal information, or perform assignments in CourtReserve.
+      </p>
+    </footer>
+  </body>
+</html>
+

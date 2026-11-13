@@ -1,0 +1,141 @@
+{
+  "profile": {
+    "name": "Maya Torres",
+    "tier": "Tier 2 Instructor",
+    "completedPoints": 3,
+    "targetPoints": 5,
+    "rolloverPoints": 1,
+    "rolloverCap": 5,
+    "achievement": "50% off Peak Unlimited"
+  },
+  "rules": [
+    "Intro, PPU 101, and PPU 102 use one instructor per session; a second instructor is added when six or more students have registered.",
+    "Guided Open Play scales from one to four instructors as player registration grows.",
+    "An instructor can request coverage for a class inside the seven-day change window."
+  ],
+  "myClasses": [
+    {
+      "id": "mine-ppu-101",
+      "type": "ppu",
+      "name": "Peak Pickleball University 101",
+      "dayOffset": 2,
+      "start": "18:00",
+      "end": "19:30",
+      "courts": "3A–3B",
+      "registered": 7,
+      "capacity": 8,
+      "instructors": ["MT"],
+      "locked": true,
+      "coverageRequested": false,
+      "points": 1
+    },
+    {
+      "id": "mine-guided-open-play",
+      "type": "guided",
+      "name": "Guided Open Play · Intermediate",
+      "dayOffset": 10,
+      "start": "09:00",
+      "end": "10:30",
+      "courts": "5–7",
+      "registered": 12,
+      "capacity": 16,
+      "instructors": ["MT", "JL"],
+      "locked": false,
+      "coverageRequested": false,
+      "points": 1
+    }
+  ],
+  "availableClasses": [
+    {
+      "id": "available-coverage",
+      "type": "guided",
+      "name": "Guided Open Play · Beginner",
+      "dayOffset": 1,
+      "start": "11:00",
+      "end": "12:30",
+      "courts": "1–2",
+      "registered": 10,
+      "capacity": 12,
+      "instructors": ["AR"],
+      "coverageNeeded": true,
+      "points": 1
+    },
+    {
+      "id": "available-intro",
+      "type": "intro",
+      "name": "Intro to Pickleball",
+      "dayOffset": 4,
+      "start": "17:30",
+      "end": "19:00",
+      "courts": "1A–1B",
+      "registered": 5,
+      "capacity": 8,
+      "instructors": [],
+      "coverageNeeded": false,
+      "points": 1
+    },
+    {
+      "id": "available-ppu-102",
+      "type": "ppu",
+      "name": "Peak Pickleball University 102",
+      "dayOffset": 6,
+      "start": "18:00",
+      "end": "19:30",
+      "courts": "3A–3B",
+      "registered": 4,
+      "capacity": 8,
+      "instructors": ["JL"],
+      "coverageNeeded": false,
+      "points": 1
+    },
+    {
+      "id": "available-guided",
+      "type": "guided",
+      "name": "Guided Open Play · Advanced",
+      "dayOffset": 12,
+      "start": "19:00",
+      "end": "20:30",
+      "courts": "6–8",
+      "registered": 9,
+      "capacity": 16,
+      "instructors": ["SK"],
+      "coverageNeeded": false,
+      "points": 1
+    }
+  ],
+  "fullClasses": [
+    {
+      "id": "full-intro",
+      "type": "intro",
+      "name": "Intro to Pickleball",
+      "dayOffset": 3,
+      "start": "10:00",
+      "end": "11:30",
+      "courts": "1A–1B",
+      "registered": 8,
+      "capacity": 8,
+      "instructors": ["AR", "SK"],
+      "state": "Instructor team full"
+    }
+  ],
+  "history": [
+    {
+      "monthOffset": 0,
+      "classes": [
+        { "name": "Intro to Pickleball", "day": 5, "time": "17:30", "points": 1 },
+        { "name": "Guided Open Play · Beginner", "day": 11, "time": "11:00", "points": 1 },
+        { "name": "Peak Pickleball University 101", "day": 17, "time": "18:00", "points": 1 }
+      ]
+    },
+    {
+      "monthOffset": -1,
+      "classes": [
+        { "name": "Guided Open Play · Intermediate", "day": 8, "time": "09:00", "points": 1 },
+        { "name": "Intro to Pickleball", "day": 15, "time": "17:30", "points": 1 },
+        { "name": "Peak Pickleball University 102", "day": 22, "time": "18:00", "points": 1 },
+        { "name": "Guided Open Play · Beginner", "day": 26, "time": "11:00", "points": 1 }
+      ]
+    }
+  ]
+}
+
