@@ -279,10 +279,8 @@
         "rolloverCap": 5,
         "achievement": "Core instructor pathway complete",
         "allowedPlayTypeIds": [
-          "intro",
           "ppu-101",
           "ppu-102",
-          "guided-beginner",
           "guided-intermediate"
         ],
         "pointsByType": {

@@ -100,6 +100,13 @@
       .sort((a, b) => a.localeCompare(b));
   }
 
+  function scopedCategories(policy = effectivePolicy()) {
+    const scopedIds = scopedPlayTypeIds(policy);
+    return policyCategories(policy).filter(category =>
+      (policy?.playTypes || []).some(type => type.category === category && scopedIds.has(type.id))
+    );
+  }
+
   function scopedPlayTypeIds(policy = state.data.policy) {
     const scope = policy?.catalogScope || {};
     const ids = new Set();
@@ -122,7 +129,7 @@
       data,
       activeMode: 'instructor',
       activeView: 'available',
-      activeFilters: new Set(policyCategories(data.policy).map(slug)),
+      activeFilters: new Set(scopedCategories(data.policy).map(slug)),
       selectedAvailable: new Set(),
       stagedCoverageId: null,
       policyDraft: clone(data.policy),
@@ -235,10 +242,16 @@
     `).join('');
   }
 
-  function renderFilters() {
+  function categoriesForItems(items) {
+    return [...new Set(items.map(categoryForItem).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b));
+  }
+
+  function renderFilters(categories) {
+    if (!categories.length) return '';
     return `
       <div class="filter-bar collectable" data-collectable aria-label="Filter classes">
-        ${policyCategories().map(category => {
+        ${categories.map(category => {
           const key = slug(category);
           return `
             <button
@@ -401,11 +414,17 @@
 
   function renderAvailableView() {
     const myClasses = state.data.myClasses;
-    const available = state.data.availableClasses
+    const scopedIds = scopedPlayTypeIds(effectivePolicy());
+    const eligibleClasses = state.data.availableClasses
+      .filter(item => scopedIds.has(item.playTypeId))
       .filter(item => isAllowed(item.playTypeId))
+      .sort((a, b) => dateForClass(a) - dateForClass(b));
+    const available = eligibleClasses
       .filter(itemMatchesFilters)
       .sort((a, b) => dateForClass(a) - dateForClass(b));
-    const restrictedCount = state.data.availableClasses.filter(item => !isAllowed(item.playTypeId)).length;
+    const restrictedCount = state.data.availableClasses
+      .filter(item => scopedIds.has(item.playTypeId) && !isAllowed(item.playTypeId)).length;
+    const policyState = state.policyDirty ? 'current draft' : 'published';
     return `
       ${renderRewardProgress()}
 
@@ -425,23 +444,32 @@
         <div class="section-header collectable" data-collectable>
           <div>
             <h3 id="available-classes-title">Eligible Classes</h3>
-            <p>Filtered by the published ${escapeHtml(activeTier()?.label || 'instructor')} policy. ${restrictedCount} other play type${restrictedCount === 1 ? ' is' : 's are'} visible in All Classes.</p>
+            <p>Filtered by the ${policyState} ${escapeHtml(activeTier()?.label || 'instructor')} policy. ${restrictedCount} admitted class${restrictedCount === 1 ? ' is' : 'es are'} restricted; classes outside the facility catalog stay hidden.</p>
           </div>
         </div>
-        ${renderFilters()}
+        ${renderFilters(categoriesForItems(eligibleClasses))}
         ${renderGroupedEvents(available, 'available')}
       </section>
     `;
   }
 
   function renderAllView() {
-    const mine = state.data.myClasses.map(item => ({ ...item, allContext: 'readonly-mine' }));
-    const available = state.data.availableClasses.map(item => ({
-      ...item,
-      allContext: isAllowed(item.playTypeId) ? 'readonly-available' : 'restricted'
-    }));
-    const full = state.data.fullClasses.map(item => ({ ...item, allContext: 'full' }));
-    const all = [...mine, ...available, ...full]
+    const scopedIds = scopedPlayTypeIds(effectivePolicy());
+    const mine = state.data.myClasses
+      .filter(item => scopedIds.has(item.playTypeId))
+      .map(item => ({ ...item, allContext: 'readonly-mine' }));
+    const available = state.data.availableClasses
+      .filter(item => scopedIds.has(item.playTypeId))
+      .map(item => ({
+        ...item,
+        allContext: isAllowed(item.playTypeId) ? 'readonly-available' : 'restricted'
+      }));
+    const full = state.data.fullClasses
+      .filter(item => scopedIds.has(item.playTypeId))
+      .map(item => ({ ...item, allContext: 'full' }));
+    const catalogClasses = [...mine, ...available, ...full]
+      .sort((a, b) => dateForClass(a) - dateForClass(b));
+    const all = catalogClasses
       .filter(itemMatchesFilters)
       .sort((a, b) => dateForClass(a) - dateForClass(b));
     return `
@@ -449,10 +477,10 @@
         <div class="section-header collectable" data-collectable>
           <div>
             <h3 id="all-classes-title">All Classes</h3>
-            <p>A read-only view of eligible, restricted, full, and assigned play types.</p>
+            <p>A read-only view of assigned, eligible, restricted, and full classes inside the facility’s admitted catalog.</p>
           </div>
         </div>
-        ${renderFilters()}
+        ${renderFilters(categoriesForItems(catalogClasses))}
         ${renderGroupedEvents(all, item => item.allContext)}
       </section>
     `;
@@ -632,7 +660,7 @@
       if (!query) return true;
       return `${type.name} ${type.category} ${type.source}`.toLowerCase().includes(query);
     });
-    const groups = policyCategories(state.policyDraft)
+    const groups = scopedCategories(state.policyDraft)
       .map(category => ({ category, types: playTypes.filter(type => type.category === category) }))
       .filter(group => group.types.length);
     return `
@@ -1320,7 +1348,7 @@
       (state.data.policy.instructors || []).map(instructor => [instructor.initials, instructor.name])
     );
     state.policyDirty = false;
-    state.activeFilters = new Set(policyCategories().map(slug));
+    state.activeFilters = new Set(scopedCategories().map(slug));
     render();
     showAlert('Policy published to this browser-only concept. The instructor workspace now reflects it.');
   }
@@ -1340,6 +1368,7 @@
     state.data.profile.tierId = state.selectedTierId;
     state.activeMode = 'instructor';
     state.activeView = 'available';
+    state.activeFilters = new Set(scopedCategories().map(slug));
     state.selectedAvailable.clear();
     state.stagedCoverageId = null;
     render();

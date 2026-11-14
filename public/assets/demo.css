@@ -70,17 +70,17 @@ button {
 }
 
 .site-header {
-  padding: clamp(48px, 7vw, 96px) 0 34px;
+  padding: clamp(30px, 4.5vw, 58px) 0 26px;
   color: #e8eee9;
 }
 
 .site-header__inner {
-  max-width: 850px;
+  max-width: 1080px;
 }
 
 .library-link {
   display: inline-flex;
-  margin-bottom: 48px;
+  margin-bottom: clamp(24px, 3.5vw, 38px);
   color: #c6d2cb;
   font-size: 0.76rem;
   font-weight: 750;
@@ -102,26 +102,26 @@ button {
 }
 
 .site-header h1 {
-  max-width: 760px;
+  max-width: 980px;
   margin: 0;
-  font-size: clamp(2.45rem, 6vw, 5.4rem);
-  font-weight: 560;
-  letter-spacing: -0.055em;
-  line-height: 0.98;
+  font-size: clamp(2.25rem, 5vw, 4.65rem);
+  font-weight: 590;
+  letter-spacing: -0.052em;
+  line-height: 1;
 }
 
 .site-header p {
-  max-width: 700px;
-  margin: 28px 0 0;
+  max-width: 760px;
+  margin: 18px 0 0;
   color: #b8c3bd;
-  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  font-size: clamp(0.98rem, 1.5vw, 1.14rem);
 }
 
 .project-facts {
   display: flex;
   flex-wrap: wrap;
   gap: 9px;
-  margin-top: 24px;
+  margin-top: 20px;
 }
 
 .project-facts span {

@@ -83,6 +83,14 @@ for (const tier of data.policy.tiers) {
     if (!scopedPlayTypeIds.has(id)) throw new Error(`Out-of-scope play type ${id} in ${tier.id}.`);
   }
 }
+const levelTwo = data.policy.tiers.find(tier => tier.id === 'level-2');
+const admittedPlayTypeCount = Object.values(data.policy.catalogScope).reduce((total, config) => {
+  if (config.mode === 'all') return total;
+  return total + (config.playTypeIds || []).length;
+}, 0);
+if (!levelTwo || levelTwo.allowedPlayTypeIds.length >= admittedPlayTypeCount) {
+  throw new Error('Maya’s sample Level 2 policy must demonstrate restricted admitted play types.');
+}
 for (const instructor of data.policy.instructors) {
   if (!tierIds.has(instructor.tierId)) throw new Error(`Unknown tier for ${instructor.id}.`);
 }
@@ -125,6 +133,8 @@ if (
   !browserJs.includes('data-conversion-destination') ||
   !browserJs.includes('setConversionDestination') ||
   !browserJs.includes('effectivePolicy') ||
+  !browserJs.includes('scopedCategories') ||
+  !browserJs.includes('classes outside the facility catalog stay hidden') ||
   !browserJs.includes('renderIncentiveAdministration') ||
   !browserJs.includes('addInstructorType') ||
   !browserJs.includes('resetInstructorPassword') ||
