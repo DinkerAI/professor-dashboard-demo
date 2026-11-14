@@ -27,9 +27,11 @@ benefits—not payroll compensation.
 
 ### Program administration
 
-- category-wide and individual play-type allow/restrict controls;
+- category-level show/restrict/hide controls that never conceal an allowed play type;
+- individual play-type allow/restrict controls;
+- unlimited facility-defined instructor types with selectable policies;
 - per-level point values, monthly targets, and rollover caps;
-- a participation roster with add, level-change, and remove controls;
+- a participation roster with add, level-change, password-reset, and remove controls;
 - editable incentive thresholds and benefit descriptions; and
 - draft, discard, publish, and instructor-preview interactions.
 

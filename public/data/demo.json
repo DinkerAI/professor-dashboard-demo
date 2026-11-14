@@ -213,6 +213,15 @@
           "intro": 1,
           "skills-clinic": 1,
           "guided-beginner": 1
+        },
+        "categoryModes": {
+          "Classes": "show",
+          "Clinics": "show",
+          "Open Play": "show",
+          "Events": "hide",
+          "Leagues": "hide",
+          "Camps": "hide",
+          "Social": "hide"
         }
       },
       {
@@ -237,6 +246,15 @@
           "ppu-102": 1,
           "guided-beginner": 1,
           "guided-intermediate": 1
+        },
+        "categoryModes": {
+          "Classes": "show",
+          "Clinics": "show",
+          "Open Play": "show",
+          "Events": "restrict",
+          "Leagues": "hide",
+          "Camps": "hide",
+          "Social": "hide"
         }
       },
       {
@@ -273,6 +291,15 @@
           "junior-camp": 2,
           "social-play": 0.5,
           "special-event": 1
+        },
+        "categoryModes": {
+          "Classes": "show",
+          "Clinics": "show",
+          "Open Play": "show",
+          "Events": "show",
+          "Leagues": "show",
+          "Camps": "show",
+          "Social": "show"
         }
       }
     ]

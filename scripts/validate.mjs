@@ -63,6 +63,9 @@ for (const tier of data.policy.tiers) {
   for (const id of tier.allowedPlayTypeIds) {
     if (!playTypeIds.has(id)) throw new Error(`Unknown play type ${id} in ${tier.id}.`);
   }
+  for (const mode of Object.values(tier.categoryModes || {})) {
+    if (!['show', 'restrict', 'hide'].includes(mode)) throw new Error(`Invalid category mode in ${tier.id}.`);
+  }
 }
 for (const instructor of data.policy.instructors) {
   if (!tierIds.has(instructor.tierId)) throw new Error(`Unknown tier for ${instructor.id}.`);
@@ -72,8 +75,24 @@ for (const incentive of data.policy.incentives) {
     throw new Error(`Invalid incentive ${incentive.id}.`);
   }
 }
-if (!browserJs.includes('setCategoryDraftAccess') || !browserJs.includes('renderIncentiveAdministration')) {
+if (
+  !browserJs.includes('setCategoryMode') ||
+  !browserJs.includes('renderIncentiveAdministration') ||
+  !browserJs.includes('addInstructorType') ||
+  !browserJs.includes('resetInstructorPassword') ||
+  !browserJs.includes('captureCollectorLayouts')
+) {
   throw new Error('Program administration behaviors are missing.');
+}
+if (!browserJs.includes("categoryModeFor(tier, type.category) === 'hide' && !allowed")) {
+  throw new Error('Allowed play types must override category hiding.');
+}
+const accessPanelSource = browserJs.slice(
+  browserJs.indexOf('function renderAccessAdministration'),
+  browserJs.indexOf('function renderInstructorAdministration')
+);
+if (accessPanelSource.indexOf('renderPolicyEditor()') > accessPanelSource.indexOf('renderCategoryAccess()')) {
+  throw new Error('Instructor policy must appear above category access.');
 }
 if (!workerJs.includes('demo.forwardcanon.com')) {
   throw new Error('The demo library custom domain is missing from the Worker.');

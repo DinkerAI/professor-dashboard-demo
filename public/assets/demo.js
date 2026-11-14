@@ -12,6 +12,8 @@
   let state = null;
   let alertTimer = null;
   let collectorFrame = 0;
+  let collectorLayouts = new WeakMap();
+  let collectorResizeTimer = 0;
 
   const elements = {
     reset: document.getElementById('reset-demo'),
@@ -483,21 +485,41 @@
     return tier?.allowedPlayTypeIds?.length || 0;
   }
 
+  function categoryModeFor(tier, category) {
+    return tier?.categoryModes?.[category] || 'show';
+  }
+
   function renderTierSelector() {
     return `
-      <div class="tier-selector" role="list" aria-label="Instructor levels">
-        ${(state.policyDraft.tiers || []).map(tier => `
-          <button
-            type="button"
-            class="tier-option ${tier.id === state.selectedTierId ? 'is-active' : ''}"
-            data-action="select-tier"
-            data-tier-id="${escapeHtml(tier.id)}"
-          >
-            <span>${escapeHtml(tier.label)}</span>
-            <small>${tier.allowedPlayTypeIds.length} allowed play types</small>
-          </button>
-        `).join('')}
-      </div>
+      <section class="instructor-type-manager" aria-labelledby="instructor-types-title">
+        <div class="instructor-type-manager__head">
+          <div>
+            <p class="eyebrow">Program structure</p>
+            <h3 id="instructor-types-title">Instructor types</h3>
+            <p>Create as many instructor types as the facility needs, then select one to curate its policy.</p>
+          </div>
+          <form id="instructor-type-form" class="instructor-type-form">
+            <label>
+              <span>New type name</span>
+              <input type="text" name="label" required placeholder="e.g. Community Host" />
+            </label>
+            <button type="submit" class="secondary-button">Add instructor type</button>
+          </form>
+        </div>
+        <div class="tier-selector" role="list" aria-label="Instructor types">
+          ${(state.policyDraft.tiers || []).map(tier => `
+            <button
+              type="button"
+              class="tier-option ${tier.id === state.selectedTierId ? 'is-active' : ''}"
+              data-action="select-tier"
+              data-tier-id="${escapeHtml(tier.id)}"
+            >
+              <span>${escapeHtml(tier.label)}</span>
+              <small>${tier.allowedPlayTypeIds.length} allowed play types</small>
+            </button>
+          `).join('')}
+        </div>
+      </section>
     `;
   }
 
@@ -532,23 +554,24 @@
           <div>
             <p class="eyebrow">Broad controls</p>
             <h3 id="category-access-title">Category access</h3>
-            <p>Apply one decision to every Court Reserve play type in a category.</p>
+            <p>Control how crowded categories appear below. Explicitly allowed play types always remain visible.</p>
           </div>
         </div>
         <div class="category-policy-list">
           ${policyCategories(state.policyDraft).map(category => {
             const types = state.policyDraft.playTypes.filter(type => type.category === category);
             const allowedCount = types.filter(type => tier?.allowedPlayTypeIds?.includes(type.id)).length;
-            const allAllowed = allowedCount === types.length;
+            const mode = categoryModeFor(tier, category);
             return `
               <article class="category-policy-row">
                 <div>
                   <strong>${escapeHtml(category)}</strong>
-                  <span>${allowedCount}/${types.length} play types allowed</span>
+                  <span>${allowedCount} allowed always visible · ${types.length - allowedCount} controlled</span>
                 </div>
-                <div>
-                  <button type="button" class="mini-policy-button ${allAllowed ? 'is-active' : ''}" data-action="allow-category" data-category="${escapeHtml(category)}">Allow</button>
-                  <button type="button" class="mini-policy-button ${allowedCount === 0 ? 'is-active is-restricted' : ''}" data-action="restrict-category" data-category="${escapeHtml(category)}">Restrict</button>
+                <div class="category-mode-buttons">
+                  <button type="button" class="mini-policy-button ${mode === 'show' ? 'is-active' : ''}" data-action="set-category-mode" data-category="${escapeHtml(category)}" data-category-mode="show">Show all</button>
+                  <button type="button" class="mini-policy-button ${mode === 'restrict' ? 'is-active is-restricted' : ''}" data-action="set-category-mode" data-category="${escapeHtml(category)}" data-category-mode="restrict">Restrict others</button>
+                  <button type="button" class="mini-policy-button ${mode === 'hide' ? 'is-active is-hidden' : ''}" data-action="set-category-mode" data-category="${escapeHtml(category)}" data-category-mode="hide">Hide others</button>
                 </div>
               </article>
             `;
@@ -562,6 +585,8 @@
     const tier = selectedDraftTier();
     const query = state.curationSearch.trim().toLowerCase();
     const playTypes = state.policyDraft.playTypes.filter(type => {
+      const allowed = tier?.allowedPlayTypeIds?.includes(type.id);
+      if (categoryModeFor(tier, type.category) === 'hide' && !allowed) return false;
       if (!query) return true;
       return `${type.name} ${type.category} ${type.source}`.toLowerCase().includes(query);
     });
@@ -657,8 +682,8 @@
       <div class="curation-layout">
         ${renderCurationCatalog()}
         <aside class="curation-sidebar">
-          ${renderCategoryAccess()}
           ${renderPolicyEditor()}
+          ${renderCategoryAccess()}
         </aside>
       </div>
       <div class="concept-boundary" role="note">
@@ -695,7 +720,10 @@
                     ${state.policyDraft.tiers.map(tier => `<option value="${escapeHtml(tier.id)}" ${tier.id === instructor.tierId ? 'selected' : ''}>${escapeHtml(tier.label)}</option>`).join('')}
                   </select>
                 </label>
-                <button type="button" class="remove-button" data-action="remove-instructor" data-instructor-id="${escapeHtml(instructor.id)}">Remove</button>
+                <div class="roster-actions">
+                  <button type="button" class="reset-button" data-action="reset-password" data-instructor-id="${escapeHtml(instructor.id)}">Reset password</button>
+                  <button type="button" class="remove-button" data-action="remove-instructor" data-instructor-id="${escapeHtml(instructor.id)}">Remove</button>
+                </div>
               </article>
             `).join('') || '<div class="empty-state">No instructors are enrolled in the participation program.</div>'}
           </div>
@@ -844,6 +872,7 @@
     elements.actionRow.hidden = !instructorMode;
     elements.view.classList.toggle('is-curation', !instructorMode);
     elements.view.innerHTML = instructorMode ? renderInstructorView() : renderCurationView();
+    captureCollectorLayouts();
     scheduleCollector();
   }
 
@@ -955,24 +984,11 @@
     render();
   }
 
-  function setCategoryDraftAccess(category, allowed) {
+  function setCategoryMode(category, mode) {
     const tier = selectedDraftTier();
-    if (!tier) return;
-    const categoryIds = state.policyDraft.playTypes
-      .filter(type => type.category === category)
-      .map(type => type.id);
-    const next = new Set(tier.allowedPlayTypeIds || []);
-    categoryIds.forEach(id => {
-      if (allowed) {
-        next.add(id);
-        if (!(id in tier.pointsByType)) {
-          tier.pointsByType[id] = playTypeById(id, state.policyDraft)?.defaultPoints ?? 1;
-        }
-      } else {
-        next.delete(id);
-      }
-    });
-    tier.allowedPlayTypeIds = Array.from(next);
+    if (!tier || !['show', 'restrict', 'hide'].includes(mode)) return;
+    if (!tier.categoryModes) tier.categoryModes = {};
+    tier.categoryModes[category] = mode;
     markPolicyDirty();
     render();
   }
@@ -1006,6 +1022,29 @@
     render();
     showAlert(`Instructor workspace previewing ${activeTier()?.label || 'the selected level'}.`);
     window.scrollTo({ top: elements.goalCard.offsetTop, behavior: 'smooth' });
+  }
+
+  function addInstructorType(form) {
+    const data = new FormData(form);
+    const label = String(data.get('label') || '').trim();
+    if (!label) return;
+    let id = slug(label) || `instructor-type-${Date.now()}`;
+    while (state.policyDraft.tiers.some(tier => tier.id === id)) id = `${id}-2`;
+    state.policyDraft.tiers.push({
+      id,
+      label,
+      description: 'Facility-defined instructor participation type.',
+      monthlyTargetPoints: 5,
+      rolloverCap: 5,
+      achievement: `${label} pathway complete`,
+      allowedPlayTypeIds: [],
+      pointsByType: {},
+      categoryModes: {}
+    });
+    state.selectedTierId = id;
+    markPolicyDirty();
+    render();
+    showAlert(`${label} created. Its access policy is ready to configure.`);
   }
 
   function addInstructor(form) {
@@ -1042,6 +1081,12 @@
     markPolicyDirty();
     render();
     showAlert(`${instructor.name} removed from the draft participation roster.`);
+  }
+
+  function resetInstructorPassword(id) {
+    const instructor = (state.policyDraft.instructors || []).find(item => item.id === id);
+    if (!instructor) return;
+    showAlert(`Password reset simulated for ${instructor.name}. No email was sent.`);
   }
 
   function addIncentive(form) {
@@ -1084,7 +1129,7 @@
     }
     const actionTarget = event.target.closest('[data-action]');
     if (!actionTarget) return;
-    const { action, view, filter, classId, tierId, playTypeId, section, category, instructorId, incentiveId } = actionTarget.dataset;
+    const { action, view, filter, classId, tierId, playTypeId, section, category, categoryMode, instructorId, incentiveId } = actionTarget.dataset;
     if (action === 'set-view') setView(view);
     if (action === 'toggle-filter') toggleFilter(filter);
     if (action === 'toggle-class') toggleClass(classId);
@@ -1096,13 +1141,13 @@
     if (action === 'toggle-play-type') toggleDraftPlayType(playTypeId);
     if (action === 'allow-all') setAllDraftPlayTypes(true);
     if (action === 'restrict-all') setAllDraftPlayTypes(false);
-    if (action === 'allow-category') setCategoryDraftAccess(category, true);
-    if (action === 'restrict-category') setCategoryDraftAccess(category, false);
+    if (action === 'set-category-mode') setCategoryMode(category, categoryMode);
     if (action === 'set-curation-section') {
       state.curationSection = section;
       render();
     }
     if (action === 'remove-instructor') removeInstructor(instructorId);
+    if (action === 'reset-password') resetInstructorPassword(instructorId);
     if (action === 'remove-incentive') removeIncentive(incentiveId);
     if (action === 'publish-policy') publishPolicy();
     if (action === 'reset-policy-draft') resetPolicyDraft();
@@ -1163,6 +1208,21 @@
     elements.goalCard.classList.remove('is-stuck');
   }
 
+  function captureCollectorLayouts() {
+    clearCollector();
+    collectorLayouts = new WeakMap();
+    if (!state || state.activeMode !== 'instructor') return;
+    elements.view.querySelectorAll('[data-collectable]').forEach(item => {
+      const rect = item.getBoundingClientRect();
+      collectorLayouts.set(item, {
+        documentLeft: rect.left + window.scrollX,
+        documentTop: rect.top + window.scrollY,
+        width: rect.width,
+        height: rect.height
+      });
+    });
+  }
+
   function updateCollector() {
     if (!state || state.activeMode !== 'instructor' || elements.goalCard.hidden) {
       clearCollector();
@@ -1180,20 +1240,16 @@
     const goalCenterY = goalRect.top + goalRect.height / 2;
 
     elements.view.querySelectorAll('[data-collectable]').forEach(item => {
-      const rendered = item.getBoundingClientRect();
-      const currentX = parseFloat(item.style.getPropertyValue('--collect-x')) || 0;
-      const currentY = parseFloat(item.style.getPropertyValue('--collect-y')) || 0;
-      const currentScaleX = parseFloat(item.style.getPropertyValue('--collect-scale-x')) || 1;
-      const currentScaleY = parseFloat(item.style.getPropertyValue('--collect-scale-y')) || 1;
+      const layout = collectorLayouts.get(item);
+      if (!layout) return;
       const rect = {
-        left: rendered.left - currentX,
-        top: rendered.top - currentY,
-        width: rendered.width / currentScaleX,
-        height: rendered.height / currentScaleY
+        left: layout.documentLeft - window.scrollX,
+        top: layout.documentTop - window.scrollY,
+        width: layout.width,
+        height: layout.height
       };
       const covered = goalRect.bottom + 2 - rect.top;
       const progress = Math.max(0, Math.min(1, covered / (rect.height + 2)));
-      const fullyCovered = covered >= Math.max(12, rect.height * 0.96);
       if (progress <= 0) {
         item.style.removeProperty('--collect-x');
         item.style.removeProperty('--collect-y');
@@ -1207,15 +1263,18 @@
       const cardCenterY = rect.top + rect.height / 2;
       const targetX = goalCenterX - cardCenterX;
       const targetY = goalCenterY - cardCenterY;
-      const approach = Math.min(progress, 0.985);
-      const collectX = fullyCovered ? targetX : Math.max(-10, Math.min(10, targetX * 0.025)) * approach;
-      const collectY = fullyCovered ? targetY : Math.max(-8, Math.min(8, targetY * 0.025)) * approach;
+      const pull = progress * progress * (3 - (2 * progress));
+      const collectX = targetX * pull;
+      const collectY = targetY * pull;
+      const fadeProgress = Math.max(0, Math.min(1, (progress - 0.82) / 0.18));
+      const opacity = 1 - fadeProgress;
+      const hidden = progress >= 0.995;
       item.style.setProperty('--collect-x', `${collectX.toFixed(1)}px`);
       item.style.setProperty('--collect-y', `${collectY.toFixed(1)}px`);
-      item.style.setProperty('--collect-scale-x', (1 - 0.012 * progress).toFixed(3));
-      item.style.setProperty('--collect-scale-y', (1 - 0.002 * progress).toFixed(3));
-      item.style.setProperty('--collect-opacity', fullyCovered ? '0' : '1');
-      item.style.setProperty('--collect-visibility', fullyCovered ? 'hidden' : 'visible');
+      item.style.setProperty('--collect-scale-x', (1 - 0.08 * pull).toFixed(3));
+      item.style.setProperty('--collect-scale-y', (1 - 0.08 * pull).toFixed(3));
+      item.style.setProperty('--collect-opacity', opacity.toFixed(3));
+      item.style.setProperty('--collect-visibility', hidden ? 'hidden' : 'visible');
     });
   }
 
@@ -1225,6 +1284,14 @@
       collectorFrame = 0;
       updateCollector();
     });
+  }
+
+  function recaptureCollectorAfterResize() {
+    clearTimeout(collectorResizeTimer);
+    collectorResizeTimer = setTimeout(() => {
+      captureCollectorLayouts();
+      scheduleCollector();
+    }, 120);
   }
 
   async function init() {
@@ -1263,6 +1330,10 @@
     next?.setSelectionRange(selectionStart, selectionStart);
   });
   elements.view.addEventListener('submit', event => {
+    if (event.target.id === 'instructor-type-form') {
+      event.preventDefault();
+      addInstructorType(event.target);
+    }
     if (event.target.id === 'instructor-form') {
       event.preventDefault();
       addInstructor(event.target);
@@ -1278,7 +1349,7 @@
     showAlert('The fictional concept data and policy draft have been reset.');
   });
   window.addEventListener('scroll', scheduleCollector, { passive: true });
-  window.addEventListener('resize', scheduleCollector);
+  window.addEventListener('resize', recaptureCollectorAfterResize);
 
   init();
 })();
