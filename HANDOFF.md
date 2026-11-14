@@ -39,7 +39,7 @@ each instructor’s history, level, and password-reset actions, while Incentives
 defines what each point threshold unlocks. Conversions separately maps an
 instructor-led starting point to one or more membership types or follow-on
 classes, with an hours/days attribution window and configurable point
-multiplier.
+award.
 
 ## Public-safety constraints
 
@@ -49,4 +49,3 @@ multiplier.
 - Court Reserve remains the source of categories, play types, and classes.
 - Keep the independent-concept / no-endorsement statement.
 - Run `npm run check` before deployment.
-

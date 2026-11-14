@@ -59,7 +59,7 @@ export default {
           'play-type point mapping',
           'discount and member-benefit incentives',
           'multi-destination membership and class conversion attribution',
-          'conversion-window point multipliers'
+          'conversion-window point awards'
         ],
         limitations: [
           'no authentication',
@@ -77,4 +77,3 @@ export default {
     return env.ASSETS.fetch(request);
   }
 };
-

@@ -131,7 +131,7 @@
         "outcomeIds": ["community-monthly", "unlimited-monthly", "family-membership"],
         "windowValue": 2,
         "windowUnit": "days",
-        "pointMultiplier": 2
+        "conversionPoints": 2
       },
       {
         "id": "ppu-101-to-102",
@@ -141,7 +141,7 @@
         "outcomeIds": ["ppu-102"],
         "windowValue": 7,
         "windowUnit": "days",
-        "pointMultiplier": 1.5
+        "conversionPoints": 1.5
       }
     ],
     "playTypes": [
@@ -457,4 +457,3 @@
     }
   ]
 }
-

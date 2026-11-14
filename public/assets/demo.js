@@ -3,7 +3,7 @@
 
   const DATA_URL = '/data/demo.json';
   const views = [
-    ['available', 'Available'],
+    ['available', 'Eligible'],
     ['all', 'All Classes'],
     ['history', 'My History']
   ];
@@ -40,6 +40,10 @@
     return JSON.parse(JSON.stringify(value));
   }
 
+  function effectivePolicy() {
+    return state?.policyDirty ? state.policyDraft : state?.data?.policy;
+  }
+
   function escapeHtml(value) {
     return String(value ?? '')
       .replaceAll('&', '&amp;')
@@ -69,26 +73,29 @@
     return (policy?.tiers || []).find(tier => tier.id === id) || policy?.tiers?.[0] || null;
   }
 
-  function activeTier(policy = state.data.policy) {
+  function activeTier(policy = effectivePolicy()) {
     return tierById(policy, state.data.profile.tierId);
   }
 
-  function playTypeById(id, policy = state.data.policy) {
+  function playTypeById(id, policy = effectivePolicy()) {
     return (policy?.playTypes || []).find(type => type.id === id) || null;
   }
 
-  function isAllowed(playTypeId, policy = state.data.policy, tierId = state.data.profile.tierId) {
+  function isAllowed(playTypeId, policy = effectivePolicy(), tierId = state.data.profile.tierId) {
     const tier = tierById(policy, tierId);
-    return Boolean(tier?.allowedPlayTypeIds?.includes(playTypeId));
+    return Boolean(
+      scopedPlayTypeIds(policy).has(playTypeId) &&
+      tier?.allowedPlayTypeIds?.includes(playTypeId)
+    );
   }
 
-  function pointsForPlayType(playTypeId, policy = state.data.policy, tierId = state.data.profile.tierId) {
+  function pointsForPlayType(playTypeId, policy = effectivePolicy(), tierId = state.data.profile.tierId) {
     const tier = tierById(policy, tierId);
     const type = playTypeById(playTypeId, policy);
     return Number(tier?.pointsByType?.[playTypeId] ?? type?.defaultPoints ?? 1);
   }
 
-  function policyCategories(policy = state.data.policy) {
+  function policyCategories(policy = effectivePolicy()) {
     return [...new Set((policy?.playTypes || []).map(type => type.category).filter(Boolean))]
       .sort((a, b) => a.localeCompare(b));
   }
@@ -104,7 +111,7 @@
     return ids;
   }
 
-  function sortedIncentives(policy = state.data.policy) {
+  function sortedIncentives(policy = effectivePolicy()) {
     return [...(policy?.incentives || [])]
       .sort((a, b) => Number(a.threshold || 0) - Number(b.threshold || 0));
   }
@@ -874,6 +881,17 @@
     `).join('');
   }
 
+  function conversionDestinationSummary(conversion) {
+    const selected = new Set(conversion.outcomeIds || []);
+    const choices = conversion.outcomeType === 'play-type'
+      ? state.policyDraft.playTypes.map(type => ({ id: type.id, name: type.name }))
+      : (state.policyDraft.membershipTypes || []);
+    const names = choices.filter(choice => selected.has(choice.id)).map(choice => choice.name);
+    if (!names.length) return 'Choose destinations';
+    if (names.length === 1) return names[0];
+    return `${names.length} destinations selected`;
+  }
+
   function renderConversionAdministration() {
     const conversions = state.policyDraft.conversions || [];
     const scopedIds = scopedPlayTypeIds(state.policyDraft);
@@ -885,7 +903,7 @@
             <div>
               <p class="eyebrow">Attribution rules</p>
               <h3 id="conversion-title">Conversion mappings</h3>
-              <p>Connect an instructor-led starting point to a later membership or class action, then award a point multiplier when it happens inside the attribution window.</p>
+              <p>Connect an instructor-led starting point to one or more later membership or class actions, then award fixed conversion points when one happens inside the attribution window.</p>
             </div>
             <span class="count-badge">${conversions.length} rules</span>
           </div>
@@ -914,10 +932,13 @@
                       <option value="play-type" ${conversion.outcomeType === 'play-type' ? 'selected' : ''}>Another class type</option>
                     </select>
                   </label>
-                  <div class="conversion-destination-picker">
-                    <span>Destinations · choose one or more</span>
+                  <details class="conversion-destination-dropdown">
+                    <summary>
+                      <span>Destinations</span>
+                      <strong data-destination-summary>${escapeHtml(conversionDestinationSummary(conversion))}</strong>
+                    </summary>
                     <div class="conversion-destination-options">${renderConversionDestinations(conversion)}</div>
-                  </div>
+                  </details>
                 </div>
                 <div class="conversion-terms">
                   <div class="conversion-window">
@@ -933,9 +954,9 @@
                       </select>
                     </label>
                   </div>
-                  <label class="multiplier-field">
-                    <span>Point multiplier</span>
-                    <div><input type="number" min="0" step="0.25" value="${escapeHtml(conversion.pointMultiplier)}" data-conversion-field="pointMultiplier" data-conversion-id="${escapeHtml(conversion.id)}" /><strong>×</strong></div>
+                  <label class="conversion-points-field">
+                    <span>Conversion points</span>
+                    <div><input type="number" min="0" step="0.25" value="${escapeHtml(conversion.conversionPoints)}" data-conversion-field="conversionPoints" data-conversion-id="${escapeHtml(conversion.id)}" /><strong>pt</strong></div>
                   </label>
                 </div>
               </article>
@@ -948,7 +969,7 @@
             <div>
               <p class="eyebrow">New attribution rule</p>
               <h3 id="add-conversion-title">Add a conversion</h3>
-              <p>Choose the instructor-led starting point. The destination, time window, and multiplier can be refined immediately after adding it.</p>
+              <p>Choose the instructor-led starting point. Destinations, time window, and conversion points can be refined immediately after adding it.</p>
             </div>
           </div>
           <form id="conversion-form" class="admin-form">
@@ -963,7 +984,7 @@
       </div>
       <div class="concept-boundary" role="note">
         <strong>Attribution, not billing</strong>
-        A conversion rule measures whether a downstream Court Reserve action happened inside the configured window. The multiplier changes participation points only; it does not alter membership price, class price, or payroll.
+        A conversion rule measures whether a downstream Court Reserve action happened inside the configured window. Conversion points are awarded separately from the source class points; they do not alter membership price, class price, or payroll.
       </div>
     `;
   }
@@ -1083,9 +1104,15 @@
   }
 
   function renderInstructorView() {
-    if (state.activeView === 'all') return renderAllView();
-    if (state.activeView === 'history') return renderHistoryView();
-    return renderAvailableView();
+    const content = state.activeView === 'all'
+      ? renderAllView()
+      : state.activeView === 'history'
+        ? renderHistoryView()
+        : renderAvailableView();
+    return `
+      ${state.policyDirty ? '<div class="draft-preview-banner" role="note"><strong>Draft policy preview</strong><span>Eligibility and points reflect the current unpublished Program Administration settings.</span></div>' : ''}
+      ${content}
+    `;
   }
 
   function render() {
@@ -1181,6 +1208,13 @@
 
   function markPolicyDirty() {
     state.policyDirty = true;
+    elements.view.querySelectorAll('[data-action="publish-policy"], [data-action="reset-policy-draft"]').forEach(button => {
+      button.disabled = false;
+    });
+    const status = elements.view.querySelector('.curation-statusbar > span');
+    if (status) status.textContent = 'Draft changes are ready to publish';
+    const versionState = elements.view.querySelector('.policy-version strong');
+    if (versionState) versionState.textContent = 'Unpublished changes';
   }
 
   function toggleDraftPlayType(id) {
@@ -1432,7 +1466,7 @@
       outcomeIds: defaultMembership ? [defaultMembership] : [],
       windowValue: 2,
       windowUnit: 'days',
-      pointMultiplier: 1.5
+      conversionPoints: 1.5
     });
     markPolicyDirty();
     render();
@@ -1448,7 +1482,7 @@
     showAlert(`${conversion.name} removed from the draft conversion rules.`);
   }
 
-  function setConversionDestination(id, destinationId, checked) {
+  function setConversionDestination(id, destinationId, checked, control) {
     const conversion = (state.policyDraft.conversions || []).find(rule => rule.id === id);
     if (!conversion) return;
     const selected = new Set(conversion.outcomeIds || []);
@@ -1456,12 +1490,13 @@
     else if (selected.size > 1) selected.delete(destinationId);
     else {
       showAlert('Each conversion rule needs at least one destination.');
-      render();
+      if (control) control.checked = true;
       return;
     }
     conversion.outcomeIds = Array.from(selected);
     markPolicyDirty();
-    render();
+    const summary = control?.closest('.conversion-destination-dropdown')?.querySelector('[data-destination-summary]');
+    if (summary) summary.textContent = conversionDestinationSummary(conversion);
   }
 
   function handleClick(event) {
@@ -1520,7 +1555,8 @@
       setConversionDestination(
         event.target.dataset.conversionId,
         event.target.dataset.destinationId,
-        event.target.checked
+        event.target.checked,
+        event.target
       );
       return;
     }
@@ -1652,9 +1688,9 @@
       const pull = progress * progress * (3 - (2 * progress));
       const collectX = targetX * pull;
       const collectY = targetY * pull;
-      const fadeProgress = Math.max(0, Math.min(1, (progress - 0.82) / 0.18));
+      const fadeProgress = Math.max(0, Math.min(1, (progress - 0.28) / 0.24));
       const opacity = 1 - fadeProgress;
-      const hidden = progress >= 0.995;
+      const hidden = progress >= 0.52;
       item.style.setProperty('--collect-x', `${collectX.toFixed(1)}px`);
       item.style.setProperty('--collect-y', `${collectY.toFixed(1)}px`);
       item.style.setProperty('--collect-scale-x', (1 - 0.08 * pull).toFixed(3));
@@ -1746,4 +1782,3 @@
 
   init();
 })();
-

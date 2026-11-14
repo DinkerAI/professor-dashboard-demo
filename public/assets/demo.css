@@ -395,6 +395,17 @@ button {
   font-size: 0.78rem;
 }
 
+.goal-card__controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.goal-card__controls .primary-button {
+  min-width: 148px;
+}
+
 .rules-popover {
   position: relative;
 }
@@ -429,6 +440,23 @@ button {
   justify-content: space-between;
   gap: 18px;
   margin-top: 24px;
+}
+
+.draft-preview-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 11px 13px;
+  color: #67500f;
+  background: var(--gold-soft);
+  border: 1px solid #e4ca7c;
+  border-radius: 11px;
+  font-size: 0.72rem;
+}
+
+.draft-preview-banner strong {
+  flex: 0 0 auto;
 }
 
 .view-tabs {
@@ -2028,21 +2056,53 @@ body.is-embed .demo-shell {
   font-weight: 900;
 }
 
-.conversion-destination-picker {
-  display: grid;
-  gap: 4px;
+.conversion-destination-dropdown {
+  position: relative;
 }
 
-.conversion-destination-picker > span {
+.conversion-destination-dropdown summary {
+  display: grid;
+  min-height: 36px;
+  padding: 6px 9px;
+  background: var(--white);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.conversion-destination-dropdown summary::-webkit-details-marker {
+  display: none;
+}
+
+.conversion-destination-dropdown summary span {
   color: var(--ink-soft);
-  font-size: 0.63rem;
+  font-size: 0.56rem;
   font-weight: 800;
 }
 
+.conversion-destination-dropdown summary strong {
+  overflow: hidden;
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .conversion-destination-options {
-  display: flex;
-  flex-wrap: wrap;
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  z-index: 30;
+  display: grid;
   gap: 5px;
+  width: min(360px, 80vw);
+  max-height: 270px;
+  padding: 8px;
+  overflow-y: auto;
+  background: var(--white);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  box-shadow: 0 16px 45px rgba(20, 32, 27, 0.18);
 }
 
 .conversion-destination-options label {
@@ -2084,18 +2144,18 @@ body.is-embed .demo-shell {
   gap: 7px;
 }
 
-.multiplier-field > div {
+.conversion-points-field > div {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.multiplier-field input {
+.conversion-points-field input {
   width: 78px;
   text-align: center;
 }
 
-.multiplier-field strong {
+.conversion-points-field strong {
   color: var(--green-dark);
   font-size: 1rem;
 }
@@ -2177,6 +2237,17 @@ body.is-embed .demo-shell {
 
   .goal-number {
     text-align: left;
+  }
+
+  .goal-card__controls {
+    width: 100%;
+    flex-wrap: wrap;
+    margin-left: 0;
+  }
+
+  .goal-card__controls .rules-popover,
+  .goal-card__controls .primary-button {
+    flex: 1 1 150px;
   }
 
   .action-row {
@@ -2338,4 +2409,3 @@ body.is-embed .demo-shell {
     transition-duration: 0.01ms !important;
   }
 }
-

@@ -108,18 +108,20 @@
           <div class="goal-card__footer">
             <span id="progress-status">Loading progress…</span>
             <span id="progress-rollover">Rollover 0/0</span>
-            <details class="rules-popover">
-              <summary>Program rules</summary>
-              <ul id="rules-list"></ul>
-            </details>
+            <div class="goal-card__controls">
+              <details class="rules-popover">
+                <summary>Program rules</summary>
+                <ul id="rules-list"></ul>
+              </details>
+              <button id="primary-action" class="primary-button" type="button" disabled>
+                Confirm selected
+              </button>
+            </div>
           </div>
         </section>
 
         <div class="action-row">
           <nav id="view-tabs" class="view-tabs" aria-label="Class views"></nav>
-          <button id="primary-action" class="primary-button" type="button" disabled>
-            Confirm selected
-          </button>
         </div>
 
         <section id="dashboard-view" class="dashboard-view" aria-live="polite"></section>
@@ -135,4 +137,3 @@
     </footer>
   </body>
 </html>
-

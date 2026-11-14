@@ -37,7 +37,7 @@ benefits—not payroll compensation.
 - editable incentive thresholds and benefit descriptions; and
 - conversion mappings from an instructor-led play type to one or more
   membership types or follow-on classes, with configurable attribution windows
-  and point multipliers;
+  and fixed conversion-point awards;
 - draft, discard, publish, and instructor-preview interactions.
 
 Court Reserve remains the source of categories, play types, and scheduled
@@ -95,4 +95,3 @@ See [HANDOFF.md](HANDOFF.md) for portfolio copy and embed details.
    Reserve API access and approval.
 
 Secrets belong in Cloudflare secret bindings and must never be committed.
-

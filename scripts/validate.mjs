@@ -111,7 +111,7 @@ for (const conversion of data.policy.conversions) {
   if (Number(conversion.windowValue) < 1 || !['hours', 'days'].includes(conversion.windowUnit)) {
     throw new Error(`Invalid attribution window for ${conversion.id}.`);
   }
-  if (Number(conversion.pointMultiplier) < 0) throw new Error(`Invalid multiplier for ${conversion.id}.`);
+  if (Number(conversion.conversionPoints) < 0) throw new Error(`Invalid conversion points for ${conversion.id}.`);
 }
 if (
   !browserJs.includes('openCatalogSetup') ||
@@ -124,12 +124,16 @@ if (
   !browserJs.includes('data-conversion-field') ||
   !browserJs.includes('data-conversion-destination') ||
   !browserJs.includes('setConversionDestination') ||
+  !browserJs.includes('effectivePolicy') ||
   !browserJs.includes('renderIncentiveAdministration') ||
   !browserJs.includes('addInstructorType') ||
   !browserJs.includes('resetInstructorPassword') ||
   !browserJs.includes('captureCollectorLayouts')
 ) {
   throw new Error('Program administration behaviors are missing.');
+}
+if (!demoHtml.includes('goal-card__controls') || !demoHtml.includes('id="primary-action"')) {
+  throw new Error('The sticky progress card must contain the selection confirmation action.');
 }
 const accessPanelSource = browserJs.slice(
   browserJs.indexOf('function renderAccessAdministration'),
@@ -156,4 +160,3 @@ for (const marker of prohibitedRuntimeMarkers) {
 }
 
 console.log('Validated Cloudflare configuration, static assets, fictional data, and runtime boundaries.');
-
