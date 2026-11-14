@@ -8,7 +8,7 @@ Pickleball scheduling workflow. The project is structured as a Cloudflare Worker
 with static assets so the same repository can begin as a public portfolio demo
 and later gain authenticated API routes and persistent storage.
 
-> Live demo URL will be added after the first Cloudflare deployment.
+> **[Open the live Professor Dashboard demo](https://professor.forwardcanon.com/)**
 
 ## What the demo shows
 
@@ -80,9 +80,10 @@ The repository is ready for Cloudflare Workers Builds:
    it automatically.
 6. Save and deploy.
 
-After the first deployment, add its `workers.dev` URL here. A custom domain such
-as `professor.forwardcanon.com` can then be attached in the Worker's
-**Settings → Domains & Routes** area.
+Production URL: `https://professor.forwardcanon.com/`
+
+Cloudflare fallback URL:
+`https://professor-dashboard-demo.cordwilson.workers.dev/`
 
 Git pushes to the production branch will deploy automatically after the GitHub
 connection is established. Pull requests can use Cloudflare preview deployments.

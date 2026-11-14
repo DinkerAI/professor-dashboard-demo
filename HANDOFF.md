@@ -17,19 +17,19 @@ Connect this repository to **Cloudflare Workers Builds** and deploy the `main`
 branch. The project name must remain `professor-dashboard-demo` unless the
 `name` field in `wrangler.jsonc` is updated to match.
 
-Initial URL:
+Cloudflare fallback URL:
 
 ```text
-https://professor-dashboard-demo.<cloudflare-account>.workers.dev
+https://professor-dashboard-demo.cordwilson.workers.dev
 ```
 
-Preferred custom domain:
+Production custom domain:
 
 ```text
 https://professor.forwardcanon.com
 ```
 
-Once the live URL exists, add it to `README.md` and use it as the portfolio link.
+Use the production custom domain as the portfolio link.
 
 ## Optional iframe integration
 
