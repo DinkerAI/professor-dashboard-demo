@@ -29,20 +29,24 @@ export default {
 
     if (url.pathname === '/api/meta') {
       return json({
-        name: 'Professor Dashboard Portfolio Demo',
-        mode: 'fictional-data reconstruction',
+        name: 'Court Reserve Instructor Dashboard Concept',
+        mode: 'fictional-data product concept',
         repository: REPOSITORY_URL,
         capabilities: [
           'class discovery',
           'local class selection',
           'coverage request simulation',
           'teaching progress',
-          'teaching history'
+          'teaching history',
+          'instructor name reveal',
+          'instructor-level policy curation',
+          'play-type access and point mapping'
         ],
         limitations: [
           'no authentication',
           'no persistent storage',
-          'no CourtReserve connection'
+          'no Court Reserve connection',
+          'browser-local policy publishing only'
         ]
       });
     }
@@ -54,3 +58,4 @@ export default {
     return env.ASSETS.fetch(request);
   }
 };
+

@@ -1,23 +1,222 @@
 {
   "profile": {
     "name": "Maya Torres",
-    "tier": "Tier 2 Instructor",
+    "tierId": "level-2",
     "completedPoints": 3,
-    "targetPoints": 5,
-    "rolloverPoints": 1,
-    "rolloverCap": 5,
-    "achievement": "50% off Peak Unlimited"
+    "rolloverPoints": 1
+  },
+  "instructorDirectory": {
+    "MT": "Maya Torres",
+    "JL": "Jordan Lee",
+    "AR": "Avery Rivera",
+    "SK": "Sam Kim",
+    "DP": "Devon Patel"
   },
   "rules": [
-    "Intro, PPU 101, and PPU 102 use one instructor per session; a second instructor is added when six or more students have registered.",
-    "Guided Open Play scales from one to four instructors as player registration grows.",
-    "An instructor can request coverage for a class inside the seven-day change window."
+    "Play-type eligibility is curated by instructor level and can be changed without altering the Court Reserve event itself.",
+    "Staffing guidance can scale with registration while the facility retains final assignment authority.",
+    "An instructor can request coverage for a class inside the configured change window."
   ],
+  "policy": {
+    "version": "Concept policy 1.2",
+    "coverageWindowDays": 7,
+    "maxAdvanceDays": 31,
+    "playTypes": [
+      {
+        "id": "intro",
+        "name": "Intro to Pickleball",
+        "category": "Classes",
+        "source": "Court Reserve play type",
+        "futureEvents": 8,
+        "staffing": "1–2 instructors",
+        "defaultPoints": 1
+      },
+      {
+        "id": "skills-clinic",
+        "name": "Skills & Drills Clinic",
+        "category": "Clinics",
+        "source": "Court Reserve play type",
+        "futureEvents": 6,
+        "staffing": "1 instructor",
+        "defaultPoints": 1
+      },
+      {
+        "id": "ppu-101",
+        "name": "Pickleball University 101",
+        "category": "Classes",
+        "source": "Court Reserve play type",
+        "futureEvents": 7,
+        "staffing": "1–2 instructors",
+        "defaultPoints": 1
+      },
+      {
+        "id": "ppu-102",
+        "name": "Pickleball University 102",
+        "category": "Classes",
+        "source": "Court Reserve play type",
+        "futureEvents": 5,
+        "staffing": "1–2 instructors",
+        "defaultPoints": 1
+      },
+      {
+        "id": "guided-beginner",
+        "name": "Guided Open Play · Beginner",
+        "category": "Open Play",
+        "source": "Court Reserve play type",
+        "futureEvents": 9,
+        "staffing": "Scales with registration",
+        "defaultPoints": 1
+      },
+      {
+        "id": "guided-intermediate",
+        "name": "Guided Open Play · Intermediate",
+        "category": "Open Play",
+        "source": "Court Reserve play type",
+        "futureEvents": 11,
+        "staffing": "Scales with registration",
+        "defaultPoints": 1
+      },
+      {
+        "id": "guided-advanced",
+        "name": "Guided Open Play · Advanced",
+        "category": "Open Play",
+        "source": "Court Reserve play type",
+        "futureEvents": 8,
+        "staffing": "Scales with registration",
+        "defaultPoints": 1.25
+      },
+      {
+        "id": "round-robin",
+        "name": "Competitive Round Robin",
+        "category": "Events",
+        "source": "Court Reserve play type",
+        "futureEvents": 4,
+        "staffing": "1 event lead",
+        "defaultPoints": 1.5
+      },
+      {
+        "id": "ladder-league",
+        "name": "Ladder League",
+        "category": "Leagues",
+        "source": "Court Reserve play type",
+        "futureEvents": 3,
+        "staffing": "1 league lead",
+        "defaultPoints": 1.5
+      },
+      {
+        "id": "junior-camp",
+        "name": "Junior Development Camp",
+        "category": "Camps",
+        "source": "Court Reserve play type",
+        "futureEvents": 2,
+        "staffing": "2 instructors",
+        "defaultPoints": 2
+      },
+      {
+        "id": "social-play",
+        "name": "Member Social Play",
+        "category": "Social",
+        "source": "Court Reserve play type",
+        "futureEvents": 5,
+        "staffing": "Optional host",
+        "defaultPoints": 0.5
+      },
+      {
+        "id": "special-event",
+        "name": "Special Event",
+        "category": "Events",
+        "source": "Court Reserve play type",
+        "futureEvents": 2,
+        "staffing": "Configured per event",
+        "defaultPoints": 1
+      }
+    ],
+    "tiers": [
+      {
+        "id": "level-1",
+        "label": "Level 1 Instructor",
+        "description": "Foundation classes and supervised open play.",
+        "monthlyTargetPoints": 3,
+        "rolloverCap": 3,
+        "achievement": "Level 2 review eligibility",
+        "allowedPlayTypeIds": [
+          "intro",
+          "skills-clinic",
+          "guided-beginner"
+        ],
+        "pointsByType": {
+          "intro": 1,
+          "skills-clinic": 1,
+          "guided-beginner": 1
+        }
+      },
+      {
+        "id": "level-2",
+        "label": "Level 2 Instructor",
+        "description": "Core instruction, guided play, and curriculum delivery.",
+        "monthlyTargetPoints": 5,
+        "rolloverCap": 5,
+        "achievement": "50% membership credit",
+        "allowedPlayTypeIds": [
+          "intro",
+          "skills-clinic",
+          "ppu-101",
+          "ppu-102",
+          "guided-beginner",
+          "guided-intermediate"
+        ],
+        "pointsByType": {
+          "intro": 1,
+          "skills-clinic": 1,
+          "ppu-101": 1,
+          "ppu-102": 1,
+          "guided-beginner": 1,
+          "guided-intermediate": 1
+        }
+      },
+      {
+        "id": "level-3",
+        "label": "Level 3 Instructor",
+        "description": "Advanced programs, competitive formats, and lead coverage.",
+        "monthlyTargetPoints": 7,
+        "rolloverCap": 7,
+        "achievement": "Lead instructor status",
+        "allowedPlayTypeIds": [
+          "intro",
+          "skills-clinic",
+          "ppu-101",
+          "ppu-102",
+          "guided-beginner",
+          "guided-intermediate",
+          "guided-advanced",
+          "round-robin",
+          "ladder-league",
+          "junior-camp",
+          "social-play",
+          "special-event"
+        ],
+        "pointsByType": {
+          "intro": 1,
+          "skills-clinic": 1,
+          "ppu-101": 1,
+          "ppu-102": 1,
+          "guided-beginner": 1,
+          "guided-intermediate": 1,
+          "guided-advanced": 1.25,
+          "round-robin": 1.5,
+          "ladder-league": 1.5,
+          "junior-camp": 2,
+          "social-play": 0.5,
+          "special-event": 1
+        }
+      }
+    ]
+  },
   "myClasses": [
     {
       "id": "mine-ppu-101",
-      "type": "ppu",
-      "name": "Peak Pickleball University 101",
+      "playTypeId": "ppu-101",
+      "name": "Pickleball University 101",
       "dayOffset": 2,
       "start": "18:00",
       "end": "19:30",
@@ -26,12 +225,11 @@
       "capacity": 8,
       "instructors": ["MT"],
       "locked": true,
-      "coverageRequested": false,
-      "points": 1
+      "coverageRequested": false
     },
     {
       "id": "mine-guided-open-play",
-      "type": "guided",
+      "playTypeId": "guided-intermediate",
       "name": "Guided Open Play · Intermediate",
       "dayOffset": 10,
       "start": "09:00",
@@ -41,14 +239,13 @@
       "capacity": 16,
       "instructors": ["MT", "JL"],
       "locked": false,
-      "coverageRequested": false,
-      "points": 1
+      "coverageRequested": false
     }
   ],
   "availableClasses": [
     {
       "id": "available-coverage",
-      "type": "guided",
+      "playTypeId": "guided-beginner",
       "name": "Guided Open Play · Beginner",
       "dayOffset": 1,
       "start": "11:00",
@@ -57,12 +254,11 @@
       "registered": 10,
       "capacity": 12,
       "instructors": ["AR"],
-      "coverageNeeded": true,
-      "points": 1
+      "coverageNeeded": true
     },
     {
       "id": "available-intro",
-      "type": "intro",
+      "playTypeId": "intro",
       "name": "Intro to Pickleball",
       "dayOffset": 4,
       "start": "17:30",
@@ -70,27 +266,23 @@
       "courts": "1A–1B",
       "registered": 5,
       "capacity": 8,
-      "instructors": [],
-      "coverageNeeded": false,
-      "points": 1
+      "instructors": []
     },
     {
       "id": "available-ppu-102",
-      "type": "ppu",
-      "name": "Peak Pickleball University 102",
+      "playTypeId": "ppu-102",
+      "name": "Pickleball University 102",
       "dayOffset": 6,
       "start": "18:00",
       "end": "19:30",
       "courts": "3A–3B",
       "registered": 4,
       "capacity": 8,
-      "instructors": ["JL"],
-      "coverageNeeded": false,
-      "points": 1
+      "instructors": ["JL"]
     },
     {
       "id": "available-guided",
-      "type": "guided",
+      "playTypeId": "guided-advanced",
       "name": "Guided Open Play · Advanced",
       "dayOffset": 12,
       "start": "19:00",
@@ -98,15 +290,37 @@
       "courts": "6–8",
       "registered": 9,
       "capacity": 16,
-      "instructors": ["SK"],
-      "coverageNeeded": false,
-      "points": 1
+      "instructors": ["SK"]
+    },
+    {
+      "id": "available-round-robin",
+      "playTypeId": "round-robin",
+      "name": "Competitive Round Robin",
+      "dayOffset": 15,
+      "start": "18:30",
+      "end": "20:30",
+      "courts": "1–4",
+      "registered": 15,
+      "capacity": 20,
+      "instructors": ["DP"]
+    },
+    {
+      "id": "available-social",
+      "playTypeId": "social-play",
+      "name": "Member Social Play",
+      "dayOffset": 18,
+      "start": "17:00",
+      "end": "19:00",
+      "courts": "4–8",
+      "registered": 22,
+      "capacity": 32,
+      "instructors": []
     }
   ],
   "fullClasses": [
     {
       "id": "full-intro",
-      "type": "intro",
+      "playTypeId": "intro",
       "name": "Intro to Pickleball",
       "dayOffset": 3,
       "start": "10:00",
@@ -124,7 +338,7 @@
       "classes": [
         { "name": "Intro to Pickleball", "day": 5, "time": "17:30", "points": 1 },
         { "name": "Guided Open Play · Beginner", "day": 11, "time": "11:00", "points": 1 },
-        { "name": "Peak Pickleball University 101", "day": 17, "time": "18:00", "points": 1 }
+        { "name": "Pickleball University 101", "day": 17, "time": "18:00", "points": 1 }
       ]
     },
     {
@@ -132,9 +346,10 @@
       "classes": [
         { "name": "Guided Open Play · Intermediate", "day": 8, "time": "09:00", "points": 1 },
         { "name": "Intro to Pickleball", "day": 15, "time": "17:30", "points": 1 },
-        { "name": "Peak Pickleball University 102", "day": 22, "time": "18:00", "points": 1 },
+        { "name": "Pickleball University 102", "day": 22, "time": "18:00", "points": 1 },
         { "name": "Guided Open Play · Beginner", "day": 26, "time": "11:00", "points": 1 }
       ]
     }
   ]
 }
+

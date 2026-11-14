@@ -2,7 +2,7 @@
   "name": "professor-dashboard-demo",
   "version": "1.0.0",
   "private": true,
-  "description": "Fictional-data reconstruction of the Peak Pickleball Professor Dashboard instructor workflow.",
+  "description": "Interactive Court Reserve Instructor Dashboard concept with fictional scheduling and curation workflows.",
   "type": "module",
   "engines": {
     "node": ">=22.12.0"
@@ -16,3 +16,4 @@
     "wrangler": "^4.161.0"
   }
 }
+

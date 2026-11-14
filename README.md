@@ -1,55 +1,60 @@
-# Professor Dashboard — Portfolio Demo
+# Court Reserve Instructor Dashboard — Product Concept
 
 [![Cloudflare Worker](https://img.shields.io/badge/Cloudflare-Worker-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
-[![Data](https://img.shields.io/badge/data-fictional-1b7f55)](#demo-boundary)
+[![Data](https://img.shields.io/badge/data-fictional-1b7f55)](#concept-boundary)
 
-An interactive, fictional-data reconstruction of the professor-facing Peak
-Pickleball scheduling workflow. The project is structured as a Cloudflare Worker
-with static assets so the same repository can begin as a public portfolio demo
-and later gain authenticated API routes and persistent storage.
+An independent, interactive product concept for instructor scheduling and
+program curation around Court Reserve play types. The project is a Cloudflare
+Worker with static assets, fictional data, and browser-local interactions.
 
-> **[Open the live Professor Dashboard demo](https://professor.forwardcanon.com/)**
+> **[Open the live Court Reserve Instructor Dashboard](https://professor.forwardcanon.com/)**
 
-## What the demo shows
+## What the concept shows
 
-- upcoming teaching assignments;
-- eligible and available classes;
-- class-type filtering;
-- locally simulated class claims;
-- seven-day coverage-request behavior;
-- read-only class status;
-- monthly teaching history and progress; and
-- responsive standalone and iframe layouts.
+### Instructor workspace
+
+- upcoming assignments, eligible classes, and teaching history;
+- policy-aware play-type and level filtering;
+- locally simulated class claims and coverage requests;
+- monthly teaching points and rollover progress;
+- full instructor names revealed from initials; and
+- the scroll-collector interaction, where content compresses into the sticky
+  progress header while the page moves.
+
+### Curation Studio
+
+- three fictional instructor levels with separate policies;
+- a searchable Court Reserve-style play-type catalog;
+- allow/restrict controls for every play type;
+- per-level point mapping, monthly targets, rollover caps, and achievements;
+- draft, discard, publish, and instructor-preview interactions; and
+- a simulated catalog extension for new play types.
 
 ## Architecture
 
 ```text
 Cloudflare Worker
-├── public/              static portfolio experience
+├── public/              static product concept
 │   ├── index.html
 │   ├── assets/
-│   └── data/demo.json   fictional, public demo data
+│   └── data/demo.json   fictional, public concept data
 ├── src/index.js         API boundary + static asset fallback
 ├── scripts/validate.mjs repository safety checks
 └── wrangler.jsonc       Worker and static asset configuration
 ```
 
-The Worker currently exposes:
+The Worker exposes `GET /api/health`, `GET /api/meta`, and all other non-API
+requests through Cloudflare static assets.
 
-- `GET /api/health` — deployment and integration status;
-- `GET /api/meta` — public demo capabilities and limitations; and
-- all other non-API requests through Cloudflare static assets.
+## Concept boundary
 
-## Demo boundary
+This repository contains no authentication, real people, operational databases,
+Court Reserve credentials, assignment automation, or production API endpoints.
+Interactions and policy publishing live only in browser memory. Refreshing the
+page or choosing **Reset demo** restores the fictional starting state.
 
-This repository intentionally contains no authentication, real people,
-operational databases, CourtReserve credentials, assignment automation, or
-production API endpoints. Interactions live only in browser memory. Refreshing
-the page or choosing **Reset demo** restores the fictional starting state.
-
-The visible disclosure must remain in any public deployment:
-
-> Portfolio demo · Fictional data · CourtReserve assignment sync disabled
+The concept is independently produced for presentation purposes and is not
+affiliated with or endorsed by Court Reserve.
 
 ## Local development
 
@@ -60,52 +65,40 @@ npm install
 npm run dev
 ```
 
-Wrangler prints the local URL. Open it in a browser to use the demo.
-
 Run all static and Worker checks:
 
 ```bash
 npm run check
 ```
 
-## Cloudflare deployment
+## Deployment
 
-The repository is ready for Cloudflare Workers Builds:
+Cloudflare Workers Builds is connected to the repository's `main` branch.
+Every push deploys automatically.
 
-1. In Cloudflare, open **Workers & Pages** and choose **Create application**.
-2. Connect GitHub and select `DinkerAI/professor-dashboard-demo`.
-3. Keep the Worker name `professor-dashboard-demo` so it matches `wrangler.jsonc`.
-4. Leave the build command empty.
-5. Use `npx wrangler deploy` as the deploy command if Cloudflare does not select
-   it automatically.
-6. Save and deploy.
+- Production: `https://professor.forwardcanon.com/`
+- Worker fallback: `https://professor-dashboard-demo.cordwilson.workers.dev/`
+- Source: `https://github.com/DinkerAI/professor-dashboard-demo`
 
-Production URL: `https://professor.forwardcanon.com/`
-
-Cloudflare fallback URL:
-`https://professor-dashboard-demo.cordwilson.workers.dev/`
-
-Git pushes to the production branch will deploy automatically after the GitHub
-connection is established. Pull requests can use Cloudflare preview deployments.
+The infrastructure slug remains `professor-dashboard-demo` to preserve the
+existing GitHub/Cloudflare build connection. The public product title is Court
+Reserve Instructor Dashboard.
 
 ## Portfolio integration
 
-Standalone route: `/`
-
-Iframe mode: `/?embed=1`
+- Standalone route: `/`
+- Iframe mode: `/?embed=1`
 
 The Content Security Policy allows framing by `forwardcanon.com` and
 `www.forwardcanon.com`. See [HANDOFF.md](HANDOFF.md) for integration details.
 
 ## Product path
 
-The current boundary is intentional:
-
-1. **Demo:** bundled fictional data and browser-local state.
-2. **Pilot:** authenticated Worker API and persistent application data.
-3. **Integration:** a separately permissioned CourtReserve API adapter, subject
-   to the required endpoint access and CourtReserve approval.
+1. **Concept:** bundled fictional data and browser-local state.
+2. **Pilot:** authentication, persistent policy, and facility-scoped roles.
+3. **Integration:** a separately permissioned Court Reserve adapter, subject to
+   Court Reserve API access and approval.
 
 Secrets must remain in Cloudflare secret bindings and must never be committed.
-CourtReserve-specific code should live behind the Worker API rather than in the
-browser bundle.
+Integration-specific code belongs behind the Worker API, not in the browser.
+

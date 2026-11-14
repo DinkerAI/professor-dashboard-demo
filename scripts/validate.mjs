@@ -6,7 +6,6 @@ const requiredFiles = [
   'public/index.html',
   'public/assets/demo.css',
   'public/assets/demo.js',
-  'public/assets/peak-mark.svg',
   'public/data/demo.json',
   'public/_headers',
   'src/index.js',
@@ -27,9 +26,10 @@ JSON.parse(rawData);
 JSON.parse(rawWrangler);
 
 const requiredHtmlMarkers = [
-  'Professor Dashboard',
-  'Portfolio demo',
-  'CourtReserve assignment sync disabled',
+  'Court Reserve Instructor Dashboard',
+  'Interactive product concept',
+  'Curation studio',
+  'No live Court Reserve connection',
   'https://github.com/DinkerAI/professor-dashboard-demo'
 ];
 
@@ -51,3 +51,4 @@ for (const marker of prohibitedRuntimeMarkers) {
 }
 
 console.log('Validated Cloudflare configuration, static assets, fictional data, and runtime boundaries.');
+

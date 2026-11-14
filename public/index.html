@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="A fictional-data reconstruction of the professor-facing Peak Pickleball scheduling workflow."
+      content="An interactive concept for a Court Reserve instructor scheduling and program-curation workspace."
     />
     <meta name="deployment-source" content="cloudflare-workers-builds:github-main" />
     <meta name="color-scheme" content="light" />
-    <title>Professor Dashboard — Portfolio Demo</title>
+    <title>Court Reserve Instructor Dashboard — Product Concept</title>
     <link rel="stylesheet" href="assets/demo.css" />
     <script src="assets/demo.js" defer></script>
   </head>
@@ -18,11 +18,11 @@
 
     <header class="site-header" data-standalone-only>
       <div class="site-header__inner">
-        <div class="project-kicker">Peak Pickleball · Professor Dashboard</div>
-        <h1>The professor-side scheduling experience.</h1>
+        <div class="project-kicker">Court Reserve · Instructor operations concept</div>
+        <h1>Instructor scheduling and program curation, together.</h1>
         <p>
-          An interactive reconstruction of the workflow instructors used to review,
-          select, and manage classes. The production integration is intentionally absent.
+          A working product concept for selecting teaching assignments, managing coverage,
+          and curating which Court Reserve play types each instructor level can access.
         </p>
         <div class="project-facts" aria-label="Demo facts">
           <span>Fictional people and classes</span>
@@ -43,32 +43,43 @@
         <div class="demo-disclosure" role="note">
           <span class="demo-disclosure__signal" aria-hidden="true"></span>
           <p>
-            <strong>Portfolio demo</strong>
-            Fictional data · CourtReserve assignment sync disabled
+            <strong>Interactive product concept</strong>
+            Fictional data · No live Court Reserve connection
           </p>
           <button id="reset-demo" class="text-button" type="button">Reset demo</button>
         </div>
 
         <header class="product-header">
           <div class="brand-lockup">
-            <img src="assets/peak-mark.svg" alt="" class="brand-mark" />
+            <div class="brand-monogram" aria-hidden="true">CR</div>
             <div>
-              <div class="brand-name">PEAK PICKLEBALL</div>
-              <h2 id="dashboard-title">Professor Dashboard</h2>
+              <div class="brand-name">COURT RESERVE CONCEPT</div>
+              <h2 id="dashboard-title">Instructor Dashboard</h2>
             </div>
           </div>
           <div class="connection-pill" aria-label="Demo connection status">
             <span aria-hidden="true"></span>
-            Demo mode · offline
+            Concept mode · local state
           </div>
         </header>
+
+        <nav id="experience-tabs" class="experience-tabs" aria-label="Dashboard experience">
+          <button type="button" class="experience-tab is-active" data-mode="instructor">
+            <span>Instructor workspace</span>
+            <small>Schedule, coverage, and history</small>
+          </button>
+          <button type="button" class="experience-tab" data-mode="curation">
+            <span>Curation studio</span>
+            <small>Play types, access, and points</small>
+          </button>
+        </nav>
 
         <div id="demo-alert" class="demo-alert" aria-live="polite" aria-atomic="true"></div>
 
         <section class="goal-card" aria-labelledby="progress-title">
           <div class="goal-card__header">
             <div>
-              <p class="eyebrow">Monthly teaching progress</p>
+              <p class="eyebrow">Monthly instruction progress</p>
               <h3 id="progress-title">Welcome back, <span id="profile-first-name">Professor</span>.</h3>
               <div class="user-line">
                 <span id="profile-name">Demo Instructor</span>
@@ -97,7 +108,7 @@
             <span id="progress-status">Loading progress…</span>
             <span id="progress-rollover">Rollover 0/0</span>
             <details class="rules-popover">
-              <summary>Class rules</summary>
+              <summary>Program rules</summary>
               <ul id="rules-list"></ul>
             </details>
           </div>
@@ -116,8 +127,8 @@
 
     <footer class="site-footer" data-standalone-only>
       <p>
-        This reconstruction demonstrates the instructor experience only. It does not
-        authenticate users, store personal information, or perform assignments in CourtReserve.
+        Independent product concept for presentation purposes. It does not authenticate users,
+        store personal information, modify Court Reserve, or imply endorsement by Court Reserve.
       </p>
       <a
         href="https://github.com/DinkerAI/professor-dashboard-demo"
@@ -127,3 +138,4 @@
     </footer>
   </body>
 </html>
+

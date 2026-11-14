@@ -1,71 +1,56 @@
 # Portfolio and Cloudflare handoff
 
-## Repository
+## Links
 
-```text
-https://github.com/DinkerAI/professor-dashboard-demo
-```
+- Live concept: `https://professor.forwardcanon.com/`
+- GitHub: `https://github.com/DinkerAI/professor-dashboard-demo`
+- Cloudflare fallback: `https://professor-dashboard-demo.cordwilson.workers.dev/`
 
-This is a Cloudflare Worker project with static assets in `public/`. It is
-technically self-contained and contains no credentials or live operational data.
-Final publication of Peak branding and workflow descriptions remains the
-portfolio owner's decision.
+The repository is a self-contained Cloudflare Worker with static assets in
+`public/`. It contains no credentials or live operational data. GitHub `main`
+is connected to Cloudflare Workers Builds and deploys automatically.
 
-## Preferred public setup
+The public title is **Court Reserve Instructor Dashboard**. The historical
+repository and Worker slug stay `professor-dashboard-demo` so the current build
+connection, URLs, and deployment history remain stable.
 
-Connect this repository to **Cloudflare Workers Builds** and deploy the `main`
-branch. The project name must remain `professor-dashboard-demo` unless the
-`name` field in `wrangler.jsonc` is updated to match.
+## Portfolio integration
 
-Cloudflare fallback URL:
-
-```text
-https://professor-dashboard-demo.cordwilson.workers.dev
-```
-
-Production custom domain:
-
-```text
-https://professor.forwardcanon.com
-```
-
-Use the production custom domain as the portfolio link.
-
-## Optional iframe integration
-
-Use the live URL with `?embed=1`:
+Use the custom domain for a normal link. To embed the experience, use:
 
 ```html
 <iframe
   src="https://professor.forwardcanon.com/?embed=1"
-  title="Interactive Professor Dashboard portfolio demo"
+  title="Interactive Court Reserve Instructor Dashboard concept"
   loading="lazy"
-  style="width:100%;min-height:900px;border:0"
+  style="width:100%;min-height:1000px;border:0"
 ></iframe>
 ```
 
 The deployed `_headers` policy permits framing from `forwardcanon.com` and
-`www.forwardcanon.com`. Keep an “Open full demo” link for mobile visitors and
-users who prefer a separate page.
+`www.forwardcanon.com`. Keep an “Open full concept” link for mobile visitors.
 
-## Required public files
+## What to feature
 
-Cloudflare serves the entire `public/` directory. Do not move individual assets
-out of it without updating their relative paths and `wrangler.jsonc`.
+- **Instructor workspace:** class selection, urgent coverage, monthly progress,
+  history, policy filtering, instructor-name reveal, and scroll collection.
+- **Curation Studio:** level selection, searchable play types, allow/restrict
+  controls, points, targets, draft publishing, and instructor preview.
 
-## Integration constraints
+## Public-safety constraints
 
-- Keep the visible “Portfolio demo” disclosure.
+- Keep the visible fictional-data and no-live-connection disclosure.
 - Do not replace fictional data with real instructor or class information.
-- Do not add credentials or CourtReserve secrets to browser code or Git.
+- Do not put Court Reserve credentials or secrets in browser code or Git.
 - Keep external integrations behind server-side Worker routes.
-- The demo stores no data; reload and **Reset demo** return the initial state.
+- Preserve the independent-concept / no-endorsement statement.
 - Run `npm run check` before merging a deployment change.
 
 ## Suggested portfolio copy
 
-**Explore the Professor Dashboard demo**
+**Explore the Court Reserve Instructor Dashboard concept**
 
-Instructor-side scheduling reconstructed with fictional data. Test the class
-selection and urgent coverage workflow directly in your browser; external
-assignment sync is intentionally disabled.
+See the instructor and program-operations sides of one workflow: select classes,
+manage coverage, curate play-type access by instructor level, and preview the
+result. Everything uses fictional data and runs safely in the browser.
+
