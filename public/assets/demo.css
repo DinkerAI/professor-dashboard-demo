@@ -1405,7 +1405,7 @@ body.is-embed .demo-shell {
 
 .admin-navigation {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin-top: 24px;
 }
@@ -1689,7 +1689,9 @@ body.is-embed .demo-shell {
 .roster-row select,
 .admin-form input,
 .admin-form select,
-.incentive-row input {
+.incentive-row input,
+.conversion-rule input,
+.conversion-rule select {
   width: 100%;
   min-height: 36px;
   padding: 7px 9px;
@@ -1979,6 +1981,83 @@ body.is-embed .demo-shell {
   text-align: center;
 }
 
+.conversion-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 17px;
+}
+
+.conversion-rule {
+  padding: 14px;
+  background: #f8faf7;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.conversion-rule__heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.conversion-rule label {
+  display: grid;
+  gap: 4px;
+  color: var(--ink-soft);
+  font-size: 0.63rem;
+  font-weight: 800;
+}
+
+.conversion-map {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) auto minmax(125px, 0.7fr) minmax(150px, 1fr);
+  gap: 9px;
+  align-items: end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.conversion-arrow {
+  display: grid;
+  height: 36px;
+  place-items: center;
+  color: var(--green-dark);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.conversion-terms {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.conversion-window {
+  display: grid;
+  grid-template-columns: 76px 110px;
+  gap: 7px;
+}
+
+.multiplier-field > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.multiplier-field input {
+  width: 78px;
+  text-align: center;
+}
+
+.multiplier-field strong {
+  color: var(--green-dark);
+  font-size: 1rem;
+}
+
 @media (max-width: 920px) {
   .event-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1998,6 +2077,15 @@ body.is-embed .demo-shell {
 
   .administration-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-navigation,
+  .conversion-map {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .conversion-arrow {
+    display: none;
   }
 }
 
@@ -2080,8 +2168,14 @@ body.is-embed .demo-shell {
   .tier-selector,
   .curation-sidebar,
   .admin-navigation,
-  .reward-steps {
+  .reward-steps,
+  .conversion-map {
     grid-template-columns: 1fr;
+  }
+
+  .conversion-terms {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .roster-row {

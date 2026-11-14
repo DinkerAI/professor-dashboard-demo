@@ -35,6 +35,8 @@ benefits—not payroll compensation.
 - an expandable participation roster with per-instructor history, level-change,
   password-reset, and remove controls;
 - editable incentive thresholds and benefit descriptions; and
+- conversion mappings from an instructor-led play type to a membership or
+  follow-on class, with configurable attribution windows and point multipliers;
 - draft, discard, publish, and instructor-preview interactions.
 
 Court Reserve remains the source of categories, play types, and scheduled

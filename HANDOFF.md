@@ -36,7 +36,9 @@ Instructors manage eligible classes and coverage. Administrators first admit a
 small program catalog from Court Reserve, then curate that focused set by play
 type and any number of facility-defined instructor types. The roster exposes
 each instructor’s history, level, and password-reset actions, while Incentives
-defines what each point threshold unlocks.
+defines what each point threshold unlocks. Conversions separately maps an
+instructor-led starting point to a membership or follow-on class, with an
+hours/days attribution window and configurable point multiplier.
 
 ## Public-safety constraints
 

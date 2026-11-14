@@ -57,6 +57,12 @@ if (!Array.isArray(data.policy?.instructors) || data.policy.instructors.length <
 if (!Array.isArray(data.policy?.incentives) || data.policy.incentives.length < 1) {
   throw new Error('The fictional incentive ladder is missing.');
 }
+if (!Array.isArray(data.policy?.membershipTypes) || data.policy.membershipTypes.length < 1) {
+  throw new Error('The fictional membership catalog is missing.');
+}
+if (!Array.isArray(data.policy?.conversions) || data.policy.conversions.length < 1) {
+  throw new Error('The fictional conversion mappings are missing.');
+}
 const playTypeIds = new Set(data.policy.playTypes.map(type => type.id));
 const tierIds = new Set(data.policy.tiers.map(tier => tier.id));
 const scopedPlayTypeIds = new Set();
@@ -85,12 +91,32 @@ for (const incentive of data.policy.incentives) {
     throw new Error(`Invalid incentive ${incentive.id}.`);
   }
 }
+const membershipIds = new Set(data.policy.membershipTypes.map(membership => membership.id));
+for (const conversion of data.policy.conversions) {
+  if (!scopedPlayTypeIds.has(conversion.sourcePlayTypeId)) {
+    throw new Error(`Conversion ${conversion.id} starts outside the program catalog.`);
+  }
+  if (!['membership', 'play-type'].includes(conversion.outcomeType)) {
+    throw new Error(`Invalid outcome type for ${conversion.id}.`);
+  }
+  const validOutcome = conversion.outcomeType === 'membership'
+    ? membershipIds.has(conversion.outcomeId)
+    : playTypeIds.has(conversion.outcomeId);
+  if (!validOutcome) throw new Error(`Invalid outcome for ${conversion.id}.`);
+  if (Number(conversion.windowValue) < 1 || !['hours', 'days'].includes(conversion.windowUnit)) {
+    throw new Error(`Invalid attribution window for ${conversion.id}.`);
+  }
+  if (Number(conversion.pointMultiplier) < 0) throw new Error(`Invalid multiplier for ${conversion.id}.`);
+}
 if (
   !browserJs.includes('openCatalogSetup') ||
   !browserJs.includes('applyCatalogSetup') ||
   !browserJs.includes('renderCatalogSetupDialog') ||
   !browserJs.includes('renderInstructorAdminHistory') ||
   !browserJs.includes('toggleInstructorHistory') ||
+  !browserJs.includes('renderConversionAdministration') ||
+  !browserJs.includes('addConversion') ||
+  !browserJs.includes('data-conversion-field') ||
   !browserJs.includes('renderIncentiveAdministration') ||
   !browserJs.includes('addInstructorType') ||
   !browserJs.includes('resetInstructorPassword') ||

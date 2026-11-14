@@ -57,7 +57,9 @@ export default {
           'instructor roster administration',
           'per-instructor program history',
           'play-type point mapping',
-          'discount and member-benefit incentives'
+          'discount and member-benefit incentives',
+          'membership and class conversion attribution',
+          'conversion-window point multipliers'
         ],
         limitations: [
           'no authentication',

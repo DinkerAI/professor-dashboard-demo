@@ -537,7 +537,8 @@
     const sections = [
       ['access', 'Access policy', 'Categories, play types, and points'],
       ['instructors', 'Instructors', 'Add, level, or remove participants'],
-      ['incentives', 'Incentives', 'Define what participation points unlock']
+      ['incentives', 'Incentives', 'Define what participation points unlock'],
+      ['conversions', 'Conversions', 'Map downstream actions to bonus points']
     ];
     return `
       <nav class="admin-navigation" aria-label="Program administration sections">
@@ -854,6 +855,111 @@
     `;
   }
 
+  function conversionOutcomeOptions(conversion) {
+    if (conversion.outcomeType === 'play-type') {
+      return state.policyDraft.playTypes.map(type => `
+        <option value="${escapeHtml(type.id)}" ${type.id === conversion.outcomeId ? 'selected' : ''}>${escapeHtml(type.name)}</option>
+      `).join('');
+    }
+    return (state.policyDraft.membershipTypes || []).map(membership => `
+      <option value="${escapeHtml(membership.id)}" ${membership.id === conversion.outcomeId ? 'selected' : ''}>${escapeHtml(membership.name)}</option>
+    `).join('');
+  }
+
+  function renderConversionAdministration() {
+    const conversions = state.policyDraft.conversions || [];
+    const scopedIds = scopedPlayTypeIds(state.policyDraft);
+    const sources = state.policyDraft.playTypes.filter(type => scopedIds.has(type.id));
+    return `
+      <div class="administration-grid administration-grid--conversions">
+        <section class="curation-card conversion-editor" aria-labelledby="conversion-title">
+          <div class="curation-card__head">
+            <div>
+              <p class="eyebrow">Attribution rules</p>
+              <h3 id="conversion-title">Conversion mappings</h3>
+              <p>Connect an instructor-led starting point to a later membership or class action, then award a point multiplier when it happens inside the attribution window.</p>
+            </div>
+            <span class="count-badge">${conversions.length} rules</span>
+          </div>
+          <div class="conversion-list">
+            ${conversions.map(conversion => `
+              <article class="conversion-rule">
+                <div class="conversion-rule__heading">
+                  <label>
+                    <span>Rule name</span>
+                    <input type="text" value="${escapeHtml(conversion.name)}" data-conversion-field="name" data-conversion-id="${escapeHtml(conversion.id)}" />
+                  </label>
+                  <button type="button" class="remove-button" data-action="remove-conversion" data-conversion-id="${escapeHtml(conversion.id)}">Remove</button>
+                </div>
+                <div class="conversion-map">
+                  <label>
+                    <span>Conversion starts at</span>
+                    <select data-conversion-field="sourcePlayTypeId" data-conversion-id="${escapeHtml(conversion.id)}">
+                      ${sources.map(type => `<option value="${escapeHtml(type.id)}" ${type.id === conversion.sourcePlayTypeId ? 'selected' : ''}>${escapeHtml(type.name)}</option>`).join('')}
+                    </select>
+                  </label>
+                  <span class="conversion-arrow" aria-hidden="true">→</span>
+                  <label>
+                    <span>Converts to</span>
+                    <select data-conversion-field="outcomeType" data-conversion-id="${escapeHtml(conversion.id)}">
+                      <option value="membership" ${conversion.outcomeType === 'membership' ? 'selected' : ''}>Membership type</option>
+                      <option value="play-type" ${conversion.outcomeType === 'play-type' ? 'selected' : ''}>Another class type</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Destination</span>
+                    <select data-conversion-field="outcomeId" data-conversion-id="${escapeHtml(conversion.id)}">${conversionOutcomeOptions(conversion)}</select>
+                  </label>
+                </div>
+                <div class="conversion-terms">
+                  <div class="conversion-window">
+                    <label>
+                      <span>Within</span>
+                      <input type="number" min="1" step="1" value="${escapeHtml(conversion.windowValue)}" data-conversion-field="windowValue" data-conversion-id="${escapeHtml(conversion.id)}" />
+                    </label>
+                    <label>
+                      <span>Time unit</span>
+                      <select data-conversion-field="windowUnit" data-conversion-id="${escapeHtml(conversion.id)}">
+                        <option value="hours" ${conversion.windowUnit === 'hours' ? 'selected' : ''}>Hours</option>
+                        <option value="days" ${conversion.windowUnit === 'days' ? 'selected' : ''}>Days</option>
+                      </select>
+                    </label>
+                  </div>
+                  <label class="multiplier-field">
+                    <span>Point multiplier</span>
+                    <div><input type="number" min="0" step="0.25" value="${escapeHtml(conversion.pointMultiplier)}" data-conversion-field="pointMultiplier" data-conversion-id="${escapeHtml(conversion.id)}" /><strong>×</strong></div>
+                  </label>
+                </div>
+              </article>
+            `).join('') || '<div class="empty-state">No conversion rules are configured.</div>'}
+          </div>
+        </section>
+
+        <section class="curation-card add-conversion-card" aria-labelledby="add-conversion-title">
+          <div class="curation-card__head">
+            <div>
+              <p class="eyebrow">New attribution rule</p>
+              <h3 id="add-conversion-title">Add a conversion</h3>
+              <p>Choose the instructor-led starting point. The destination, time window, and multiplier can be refined immediately after adding it.</p>
+            </div>
+          </div>
+          <form id="conversion-form" class="admin-form">
+            <label class="wide-field"><span>Rule name</span><input name="name" type="text" required placeholder="Intro class to membership" /></label>
+            <label class="wide-field">
+              <span>Starting play type</span>
+              <select name="sourcePlayTypeId">${sources.map(type => `<option value="${escapeHtml(type.id)}">${escapeHtml(type.name)}</option>`).join('')}</select>
+            </label>
+            <button type="submit" class="primary-button">Add conversion rule</button>
+          </form>
+        </section>
+      </div>
+      <div class="concept-boundary" role="note">
+        <strong>Attribution, not billing</strong>
+        A conversion rule measures whether a downstream Court Reserve action happened inside the configured window. The multiplier changes participation points only; it does not alter membership price, class price, or payroll.
+      </div>
+    `;
+  }
+
   function renderCatalogSetupDialog() {
     if (!state.catalogSetupOpen) return '';
     const draft = state.catalogSetupDraft || {};
@@ -923,7 +1029,7 @@
           <div>
             <p class="eyebrow">Facility configuration</p>
             <h2 id="curation-title">Program Administration</h2>
-            <p>Curate class eligibility, manage participating instructors, and define the member benefits earned with points.</p>
+            <p>Curate eligibility, manage participating instructors, define member benefits, and map downstream conversions to bonus points.</p>
           </div>
           <div class="policy-version">
             <span>${escapeHtml(state.policyDraft.version)}</span>
@@ -942,6 +1048,8 @@
           ? renderInstructorAdministration()
           : state.curationSection === 'incentives'
             ? renderIncentiveAdministration()
+            : state.curationSection === 'conversions'
+              ? renderConversionAdministration()
             : renderAccessAdministration()}
       </section>
       ${renderCatalogSetupDialog()}
@@ -1299,6 +1407,39 @@
     showAlert(`${incentive.name} removed from the draft incentive ladder.`);
   }
 
+  function addConversion(form) {
+    const data = new FormData(form);
+    const name = String(data.get('name') || '').trim();
+    const sourcePlayTypeId = String(data.get('sourcePlayTypeId') || '').trim();
+    if (!name || !sourcePlayTypeId) return;
+    let id = slug(name) || `conversion-${Date.now()}`;
+    while ((state.policyDraft.conversions || []).some(rule => rule.id === id)) id = `${id}-2`;
+    const defaultMembership = state.policyDraft.membershipTypes?.[0]?.id || '';
+    if (!state.policyDraft.conversions) state.policyDraft.conversions = [];
+    state.policyDraft.conversions.push({
+      id,
+      name,
+      sourcePlayTypeId,
+      outcomeType: 'membership',
+      outcomeId: defaultMembership,
+      windowValue: 2,
+      windowUnit: 'days',
+      pointMultiplier: 1.5
+    });
+    markPolicyDirty();
+    render();
+    showAlert(`${name} added to the draft conversion rules.`);
+  }
+
+  function removeConversion(id) {
+    const conversion = (state.policyDraft.conversions || []).find(rule => rule.id === id);
+    if (!conversion) return;
+    state.policyDraft.conversions = state.policyDraft.conversions.filter(rule => rule.id !== id);
+    markPolicyDirty();
+    render();
+    showAlert(`${conversion.name} removed from the draft conversion rules.`);
+  }
+
   function handleClick(event) {
     const initial = event.target.closest('[data-instructor-initial]');
     if (initial) {
@@ -1309,7 +1450,7 @@
     }
     const actionTarget = event.target.closest('[data-action]');
     if (!actionTarget) return;
-    const { action, view, filter, classId, tierId, playTypeId, section, category, scopeMode, instructorId, incentiveId } = actionTarget.dataset;
+    const { action, view, filter, classId, tierId, playTypeId, section, category, scopeMode, instructorId, incentiveId, conversionId } = actionTarget.dataset;
     if (action === 'set-view') setView(view);
     if (action === 'toggle-filter') toggleFilter(filter);
     if (action === 'toggle-class') toggleClass(classId);
@@ -1334,6 +1475,7 @@
     if (action === 'reset-password') resetInstructorPassword(instructorId);
     if (action === 'toggle-instructor-history') toggleInstructorHistory(instructorId);
     if (action === 'remove-incentive') removeIncentive(incentiveId);
+    if (action === 'remove-conversion') removeConversion(conversionId);
     if (action === 'publish-policy') publishPolicy();
     if (action === 'reset-policy-draft') resetPolicyDraft();
     if (action === 'preview-tier') previewSelectedTier();
@@ -1384,6 +1526,24 @@
       incentive[field] = event.target.type === 'number'
         ? Math.max(0, Number(event.target.value || 0))
         : event.target.value;
+      markPolicyDirty();
+      render();
+      return;
+    }
+    if (event.target.matches('[data-conversion-field]')) {
+      const conversion = (state.policyDraft.conversions || []).find(
+        rule => rule.id === event.target.dataset.conversionId
+      );
+      if (!conversion) return;
+      const field = event.target.dataset.conversionField;
+      conversion[field] = event.target.type === 'number'
+        ? Math.max(field === 'windowValue' ? 1 : 0, Number(event.target.value || 0))
+        : event.target.value;
+      if (field === 'outcomeType') {
+        conversion.outcomeId = conversion.outcomeType === 'play-type'
+          ? state.policyDraft.playTypes[0]?.id || ''
+          : state.policyDraft.membershipTypes?.[0]?.id || '';
+      }
       markPolicyDirty();
       render();
     }
@@ -1534,6 +1694,10 @@
     if (event.target.id === 'incentive-form') {
       event.preventDefault();
       addIncentive(event.target);
+    }
+    if (event.target.id === 'conversion-form') {
+      event.preventDefault();
+      addConversion(event.target);
     }
   });
   elements.primaryAction.addEventListener('click', commitPrimaryAction);

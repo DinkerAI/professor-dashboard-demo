@@ -117,6 +117,33 @@
         "description": "Usable for reservations, clinics, or pro-shop purchases."
       }
     ],
+    "membershipTypes": [
+      { "id": "community-monthly", "name": "Community Monthly" },
+      { "id": "unlimited-monthly", "name": "Unlimited Monthly" },
+      { "id": "family-membership", "name": "Family Membership" }
+    ],
+    "conversions": [
+      {
+        "id": "intro-to-unlimited",
+        "name": "Intro class to membership",
+        "sourcePlayTypeId": "intro",
+        "outcomeType": "membership",
+        "outcomeId": "unlimited-monthly",
+        "windowValue": 2,
+        "windowUnit": "days",
+        "pointMultiplier": 2
+      },
+      {
+        "id": "ppu-101-to-102",
+        "name": "Course progression",
+        "sourcePlayTypeId": "ppu-101",
+        "outcomeType": "play-type",
+        "outcomeId": "ppu-102",
+        "windowValue": 7,
+        "windowUnit": "days",
+        "pointMultiplier": 1.5
+      }
+    ],
     "playTypes": [
       {
         "id": "intro",
