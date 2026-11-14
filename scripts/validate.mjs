@@ -5,10 +5,14 @@ const root = resolve(import.meta.dirname, '..');
 const requiredFiles = [
   'public/index.html',
   'public/court-reserve-instructor-dashboard/index.html',
+  'public/tournament-calculator/index.html',
   'public/assets/hub.css',
   'public/assets/demo.css',
   'public/assets/demo.js',
+  'public/assets/tournament.css',
+  'public/assets/tournament.js',
   'public/data/demo.json',
+  'public/data/tournament-demo.json',
   'public/_headers',
   'src/index.js',
   'wrangler.jsonc'
@@ -16,30 +20,42 @@ const requiredFiles = [
 
 await Promise.all(requiredFiles.map(file => access(resolve(root, file))));
 
-const [hubHtml, demoHtml, browserJs, workerJs, rawData, rawWrangler] = await Promise.all([
+const [hubHtml, demoHtml, browserJs, tournamentHtml, tournamentJs, workerJs, rawData, rawTournamentData, rawWrangler] = await Promise.all([
   readFile(resolve(root, 'public/index.html'), 'utf8'),
   readFile(resolve(root, 'public/court-reserve-instructor-dashboard/index.html'), 'utf8'),
   readFile(resolve(root, 'public/assets/demo.js'), 'utf8'),
+  readFile(resolve(root, 'public/tournament-calculator/index.html'), 'utf8'),
+  readFile(resolve(root, 'public/assets/tournament.js'), 'utf8'),
   readFile(resolve(root, 'src/index.js'), 'utf8'),
   readFile(resolve(root, 'public/data/demo.json'), 'utf8'),
+  readFile(resolve(root, 'public/data/tournament-demo.json'), 'utf8'),
   readFile(resolve(root, 'wrangler.jsonc'), 'utf8')
 ]);
 
 JSON.parse(rawData);
+JSON.parse(rawTournamentData);
 JSON.parse(rawWrangler);
 
 const requiredHubMarkers = [
   'Forward Canon Demo Library',
   '/court-reserve-instructor-dashboard/',
+  '/tournament-calculator/',
+  '02</strong><span>live concepts',
   'Demos you can actually use.'
 ];
 
 const requiredDemoMarkers = [
   'Court Reserve Instructor Dashboard',
-  'Interactive product concept',
   'Program administration',
-  'No live Court Reserve connection',
-  'https://github.com/DinkerAI/professor-dashboard-demo'
+  'Fictional demo · no live connection'
+];
+
+const requiredTournamentMarkers = [
+  'Tournament Calculator',
+  'Plan the bracket before opening registration.',
+  'Scenario forecast',
+  'Calculation rows',
+  'Interactive product concept'
 ];
 
 for (const marker of requiredHubMarkers) {
@@ -50,7 +66,30 @@ for (const marker of requiredDemoMarkers) {
   if (!demoHtml.includes(marker)) throw new Error(`Missing required demo marker: ${marker}`);
 }
 
+for (const marker of requiredTournamentMarkers) {
+  if (!tournamentHtml.includes(marker)) throw new Error(`Missing required tournament marker: ${marker}`);
+}
+
+if (demoHtml.includes('project-facts') || demoHtml.includes('demo-disclosure')) {
+  throw new Error('The removed instructor-demo marketing and disclosure bands returned.');
+}
+
 const data = JSON.parse(rawData);
+const tournamentData = JSON.parse(rawTournamentData);
+if (!Array.isArray(tournamentData.scenarios) || tournamentData.scenarios.length !== 3) {
+  throw new Error('The tournament demo needs max, 80%, and 60% scenarios.');
+}
+if (!Array.isArray(tournamentData.calculationRows) || tournamentData.calculationRows.length < 3) {
+  throw new Error('The tournament demo calculation model is incomplete.');
+}
+if (
+  !tournamentJs.includes('calculateScenario') ||
+  !tournamentJs.includes('solvePlayersForHours') ||
+  !tournamentJs.includes('addCalculationRow') ||
+  !tournamentJs.includes('renderDivisionSpread')
+) {
+  throw new Error('Tournament calculator behaviors are missing.');
+}
 if (!Array.isArray(data.policy?.instructors) || data.policy.instructors.length < 1) {
   throw new Error('The fictional instructor roster is missing.');
 }
@@ -155,6 +194,9 @@ if (accessPanelSource.indexOf('renderPolicyEditor()') > accessPanelSource.indexO
 if (!workerJs.includes('demo.forwardcanon.com')) {
   throw new Error('The demo library custom domain is missing from the Worker.');
 }
+if (!workerJs.includes('/tournament-calculator/')) {
+  throw new Error('The tournament calculator route is missing from the Worker.');
+}
 
 const prohibitedRuntimeMarkers = [
   'api.peakpickleball.us',
@@ -164,7 +206,7 @@ const prohibitedRuntimeMarkers = [
 ];
 
 for (const marker of prohibitedRuntimeMarkers) {
-  if (browserJs.includes(marker) || workerJs.includes(marker)) {
+  if (browserJs.includes(marker) || tournamentJs.includes(marker) || workerJs.includes(marker)) {
     throw new Error(`Production runtime reference found: ${marker}`);
   }
 }

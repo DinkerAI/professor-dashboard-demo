@@ -4,6 +4,7 @@
 
 - Library: `https://demo.forwardcanon.com/`
 - Direct demo: `https://demo.forwardcanon.com/court-reserve-instructor-dashboard/`
+- Tournament calculator: `https://demo.forwardcanon.com/tournament-calculator/`
 - GitHub: `https://github.com/DinkerAI/professor-dashboard-demo`
 - Cloudflare fallback: `https://professor-dashboard-demo.cordwilson.workers.dev/`
 
@@ -25,6 +26,10 @@ Link directly to the demo, or embed it with:
 
 Keep an “Open full demo” link for mobile visitors and users who prefer a
 separate page.
+
+The Tournament Calculator is best linked directly. It is a separate interactive
+concept that models event-grid capacity, three fill scenarios, court runtime,
+medals, staffing, registration pricing, and editable revenue or expense rows.
 
 ## Suggested portfolio copy
 

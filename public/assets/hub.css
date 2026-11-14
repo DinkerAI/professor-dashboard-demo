@@ -142,6 +142,16 @@ a { color: inherit; }
   transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
 }
 
+.demo-card--tournament {
+  background:
+    radial-gradient(circle at 85% 10%, rgba(217, 196, 126, 0.17), transparent 18rem),
+    var(--panel);
+}
+
+.demo-card--tournament:hover {
+  border-color: rgba(217, 196, 126, 0.55);
+}
+
 .demo-card--live:hover {
   border-color: rgba(135, 223, 176, 0.54);
   box-shadow: 0 25px 65px rgba(0, 0, 0, 0.24);
@@ -178,6 +188,11 @@ a { color: inherit; }
   background: var(--green);
   border-radius: 18px;
   font-weight: 950;
+}
+
+.demo-card__mark--tournament {
+  color: #151207;
+  background: var(--gold);
 }
 
 .demo-card__body { margin-top: auto; }
@@ -271,4 +286,3 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }
-

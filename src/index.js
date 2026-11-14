@@ -1,6 +1,7 @@
 const REPOSITORY_URL = 'https://github.com/DinkerAI/professor-dashboard-demo';
 const DEMO_ORIGIN = 'https://demo.forwardcanon.com';
 const INSTRUCTOR_DEMO_PATH = '/court-reserve-instructor-dashboard/';
+const TOURNAMENT_DEMO_PATH = '/tournament-calculator/';
 
 function json(payload, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(payload, null, 2), {
@@ -26,6 +27,10 @@ export default {
       return Response.redirect(`${url.origin}${INSTRUCTOR_DEMO_PATH}${url.search}`, 308);
     }
 
+    if (url.pathname === '/tournament-calculator') {
+      return Response.redirect(`${url.origin}${TOURNAMENT_DEMO_PATH}${url.search}`, 308);
+    }
+
     if (url.pathname === '/api/health') {
       return json({
         ok: true,
@@ -44,6 +49,10 @@ export default {
         mode: 'fictional-data product concept',
         repository: REPOSITORY_URL,
         demo: `${DEMO_ORIGIN}${INSTRUCTOR_DEMO_PATH}`,
+        demos: [
+          `${DEMO_ORIGIN}${INSTRUCTOR_DEMO_PATH}`,
+          `${DEMO_ORIGIN}${TOURNAMENT_DEMO_PATH}`
+        ],
         capabilities: [
           'class discovery',
           'local class selection',
@@ -59,7 +68,8 @@ export default {
           'play-type point mapping',
           'discount and member-benefit incentives',
           'multi-destination membership and class conversion attribution',
-          'conversion-window point awards'
+          'conversion-window point awards',
+          'tournament capacity and financial scenario modeling'
         ],
         limitations: [
           'no authentication',

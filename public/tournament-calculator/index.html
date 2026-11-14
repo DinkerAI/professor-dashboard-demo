@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="An interactive fictional-data tournament capacity and financial planning calculator."
+    />
+    <meta name="color-scheme" content="light" />
+    <title>Tournament Calculator — Forward Canon Demo</title>
+    <link rel="stylesheet" href="/assets/tournament.css" />
+    <script src="/assets/tournament.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#calculator">Skip to calculator</a>
+
+    <main id="calculator" class="calculator-wrap">
+      <section class="calculator-shell" aria-labelledby="calculator-title">
+        <header class="product-bar">
+          <a class="library-link" href="/">← Demo library</a>
+          <div class="product-brand">
+            <span class="product-mark" aria-hidden="true">TC</span>
+            <div>
+              <span>FORWARD CANON · OPERATIONS CONCEPT</span>
+              <strong>Tournament Calculator</strong>
+            </div>
+          </div>
+          <div class="product-status"><span aria-hidden="true"></span>Fictional model · browser local</div>
+          <button id="reset-calculator" class="button button--quiet" type="button">Reset demo</button>
+        </header>
+
+        <section class="calculator-intro">
+          <div>
+            <p class="eyebrow">Tournament operations</p>
+            <h1 id="calculator-title">Plan the bracket before opening registration.</h1>
+            <p>
+              Build the event grid once, then compare capacity, runtime, medals, staffing,
+              revenue, expenses, and net across three fill scenarios.
+            </p>
+          </div>
+          <label class="name-field">
+            <span>Tournament name</span>
+            <input id="tournament-name" type="text" autocomplete="off" />
+          </label>
+        </section>
+
+        <section class="scenario-strip" id="scenario-strip" aria-label="Scenario summary"></section>
+
+        <div class="workspace">
+          <aside class="control-column" aria-label="Tournament configuration">
+            <section class="panel driver-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">01 · Forecast driver</p>
+                  <h2>Start with demand or runtime</h2>
+                </div>
+              </div>
+              <div class="driver-switch" role="group" aria-label="Forecast driver">
+                <button type="button" data-driver="players">Players</button>
+                <button type="button" data-driver="hours">Hours</button>
+              </div>
+              <div class="driver-inputs">
+                <label><span>Max-fill players</span><input data-field="players" type="number" min="20" step="10" /></label>
+                <label><span>Target runtime</span><div class="input-unit"><input data-field="targetHours" type="number" min="1" step="1" /><em>hrs</em></div></label>
+              </div>
+              <p class="field-note" id="driver-note"></p>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">02 · Event grid</p>
+                  <h2>Bracket structure</h2>
+                </div>
+                <strong class="panel-stat"><span id="grid-capacity">0</span><small>possible divisions</small></strong>
+              </div>
+
+              <div class="toggle-block">
+                <span>Player groups</span>
+                <div class="toggle-row">
+                  <label><input data-group="mens" type="checkbox" />Men’s</label>
+                  <label><input data-group="womens" type="checkbox" />Women’s</label>
+                  <label><input data-group="mixed" type="checkbox" />Mixed</label>
+                </div>
+              </div>
+              <div class="toggle-block">
+                <span>Formats</span>
+                <div class="toggle-row">
+                  <label><input data-format="doubles" type="checkbox" />Doubles</label>
+                  <label><input data-format="singles" type="checkbox" />Singles</label>
+                </div>
+              </div>
+
+              <div class="field-grid field-grid--three">
+                <label><span>DUPR minimum</span><input data-grid="duprMin" type="number" min="2" max="5.5" step="0.5" /></label>
+                <label><span>DUPR maximum</span><input data-grid="duprMax" type="number" min="2.5" max="6" step="0.5" /></label>
+                <label><span>DUPR step</span><input data-grid="duprIncrement" type="number" min="0.25" step="0.25" /></label>
+                <label><span>Age minimum</span><input data-grid="ageMin" type="number" min="8" step="1" /></label>
+                <label><span>Age maximum</span><input data-grid="ageMax" type="number" min="9" step="1" /></label>
+                <label><span>Age step</span><input data-grid="ageIncrement" type="number" min="1" step="1" /></label>
+                <label><span>Minimum teams</span><input data-grid="minTeams" type="number" min="2" step="1" /></label>
+                <label><span>Maximum teams</span><input data-grid="maxTeams" type="number" min="2" step="1" /></label>
+                <label><span>Events / player</span><input data-grid="averageEventsPerPlayer" type="number" min="1" step="0.05" /></label>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">03 · Runtime</p>
+                  <h2>Courts and match flow</h2>
+                </div>
+              </div>
+              <div class="field-grid field-grid--two">
+                <label><span>Courts</span><input data-grid="courts" type="number" min="1" step="1" /></label>
+                <label><span>Pool games / team</span><input data-grid="poolGamesPerTeam" type="number" min="1" step="1" /></label>
+                <label><span>Minutes / match</span><input data-grid="matchMinutes" type="number" min="5" step="5" /></label>
+              </div>
+              <div class="toggle-row toggle-row--stack">
+                <label><input data-grid-toggle="championshipBracket" type="checkbox" />Championship bracket</label>
+                <label><input data-grid-toggle="bronzeMatch" type="checkbox" />Bronze match</label>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">04 · Pricing</p>
+                  <h2>Registration and events</h2>
+                </div>
+                <strong class="panel-stat"><span id="registration-average">$0</span><small>average registration</small></strong>
+              </div>
+              <div id="registration-marks" class="registration-marks"></div>
+              <label class="standalone-field"><span>Individual event fee</span><div class="input-unit input-unit--currency"><em>$</em><input data-pricing="eventFee" type="number" min="0" step="1" /></div></label>
+            </section>
+          </aside>
+
+          <section class="output-column" aria-label="Tournament forecast outputs">
+            <section class="panel output-panel">
+              <div class="panel-heading panel-heading--output">
+                <div>
+                  <p class="eyebrow">Scenario forecast</p>
+                  <h2>Operational outcomes</h2>
+                  <p>Every scenario uses the same event grid and pricing model.</p>
+                </div>
+                <span class="live-label"><i></i>Updates live</span>
+              </div>
+              <div class="scenario-table-wrap">
+                <table class="scenario-table">
+                  <thead>
+                    <tr><th>Scenario</th><th>Players</th><th>Divisions</th><th>Teams / div.</th><th>Medals</th><th>Games</th><th>Hours</th><th>Volunteers</th><th>Net</th></tr>
+                  </thead>
+                  <tbody id="scenario-table-body"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel ledger-panel">
+              <div class="panel-heading panel-heading--output">
+                <div>
+                  <p class="eyebrow">Financial model</p>
+                  <h2>Calculation rows</h2>
+                  <p>Add sponsors, medals, staffing, processing, revenue shares, or other assumptions.</p>
+                </div>
+                <button id="add-calculation-row" class="button" type="button">Add row</button>
+              </div>
+              <div class="ledger-table-wrap">
+                <table class="ledger-table">
+                  <thead><tr><th>Title</th><th>Type</th><th>Calculation</th><th>Value</th><th></th></tr></thead>
+                  <tbody id="calculation-rows"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="result-grid">
+              <article class="panel result-card">
+                <div class="panel-heading">
+                  <div><p class="eyebrow">Max-fill ledger</p><h2>Revenue and expenses</h2></div>
+                  <strong id="max-net" class="net-total">$0</strong>
+                </div>
+                <div id="max-ledger" class="mini-ledger"></div>
+              </article>
+
+              <article class="panel result-card">
+                <div class="panel-heading">
+                  <div><p class="eyebrow">Capacity model</p><h2>Division spread</h2></div>
+                  <strong class="panel-stat"><span id="runnable-divisions">0</span><small>runnable divisions</small></strong>
+                </div>
+                <div id="division-spread" class="division-spread"></div>
+                <p class="field-note">Bars estimate team demand across the configured age and DUPR grid.</p>
+              </article>
+            </section>
+          </section>
+        </div>
+
+        <footer class="concept-note">
+          <strong>Interactive product concept</strong>
+          Fictional assumptions only. No tournament records, registrations, payments, or Court Reserve data are stored or modified.
+        </footer>
+      </section>
+    </main>
+  </body>
+</html>

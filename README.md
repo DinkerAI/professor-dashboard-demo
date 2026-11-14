@@ -9,6 +9,8 @@ an index; each concept has a stable direct route that can be linked or embedded.
 - **Demo library:** `https://demo.forwardcanon.com/`
 - **Court Reserve Instructor Dashboard:**
   `https://demo.forwardcanon.com/court-reserve-instructor-dashboard/`
+- **Tournament Calculator:**
+  `https://demo.forwardcanon.com/tournament-calculator/`
 - **Source:** `https://github.com/DinkerAI/professor-dashboard-demo`
 
 ## Court Reserve Instructor Dashboard
@@ -43,6 +45,14 @@ benefits—not payroll compensation.
 Court Reserve remains the source of categories, play types, and scheduled
 classes. This concept cannot create, rename, or delete those records.
 
+## Tournament Calculator
+
+A fictional-data reconstruction of the tournament planning workflow developed
+for Peak Pickleball. It connects the event grid, fill scenarios, court runtime,
+medal ordering, staffing, registration pricing, and editable revenue or expense
+assumptions in one browser-local model. The demo intentionally excludes shared
+team storage, scheduled Court Reserve events, and operational tournament data.
+
 ## Architecture
 
 ```text
@@ -50,6 +60,7 @@ Cloudflare Worker
 ├── public/
 │   ├── index.html                              demo library
 │   ├── court-reserve-instructor-dashboard/    direct demo route
+│   ├── tournament-calculator/                  direct calculator route
 │   ├── assets/
 │   └── data/demo.json                         fictional concept data
 ├── src/index.js                               routes + API boundary
@@ -84,6 +95,7 @@ npm run check
 
 - Direct link: `/court-reserve-instructor-dashboard/`
 - Iframe: `/court-reserve-instructor-dashboard/?embed=1`
+- Tournament link: `/tournament-calculator/`
 
 See [HANDOFF.md](HANDOFF.md) for portfolio copy and embed details.
 

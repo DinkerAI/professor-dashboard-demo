@@ -152,6 +152,7 @@ button {
 }
 
 .demo-wrap {
+  padding-top: 28px;
   padding-bottom: 60px;
 }
 
@@ -269,6 +270,10 @@ button {
   height: 7px;
   background: var(--green);
   border-radius: 50%;
+}
+
+.product-reset {
+  flex: 0 0 auto;
 }
 
 .demo-alert {
@@ -2227,7 +2232,8 @@ body.is-embed .demo-shell {
     flex-direction: column;
   }
 
-  .connection-pill {
+  .connection-pill,
+  .product-reset {
     align-self: flex-start;
   }
 

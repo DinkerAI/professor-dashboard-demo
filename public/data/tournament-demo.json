@@ -1,0 +1,51 @@
+{
+  "name": "Front Range Open — Concept",
+  "driver": "players",
+  "players": 320,
+  "targetHours": 16,
+  "pricing": {
+    "registrationMarks": [
+      { "id": "early", "label": "Early bird", "amount": 35 },
+      { "id": "standard", "label": "Standard", "amount": 60 },
+      { "id": "late", "label": "Late entry", "amount": 85 }
+    ],
+    "eventFee": 15
+  },
+  "grid": {
+    "duprMin": 2.5,
+    "duprMax": 4.5,
+    "duprIncrement": 0.5,
+    "ageMin": 19,
+    "ageMax": 69,
+    "ageIncrement": 10,
+    "minTeams": 4,
+    "maxTeams": 12,
+    "averageEventsPerPlayer": 1.75,
+    "courts": 16,
+    "poolGamesPerTeam": 4,
+    "matchMinutes": 25,
+    "championshipBracket": true,
+    "bronzeMatch": true,
+    "groups": {
+      "mens": true,
+      "womens": true,
+      "mixed": true
+    },
+    "formats": {
+      "doubles": true,
+      "singles": false
+    }
+  },
+  "calculationRows": [
+    { "id": "sponsor", "title": "Presenting sponsor", "type": "revenue", "mode": "static", "amount": 3500 },
+    { "id": "medals", "title": "Medal package", "type": "expense", "mode": "perMedal", "amount": 15 },
+    { "id": "platform", "title": "Bracket platform", "type": "expense", "mode": "percentGross", "amount": 3 },
+    { "id": "staff", "title": "Tournament staff", "type": "expense", "mode": "perHour", "amount": 42 },
+    { "id": "facility", "title": "Facility allocation", "type": "expense", "mode": "percentNet", "amount": 12 }
+  ],
+  "scenarios": [
+    { "id": "max", "label": "Max fill", "percent": 1 },
+    { "id": "eighty", "label": "80% fill", "percent": 0.8 },
+    { "id": "sixty", "label": "60% fill", "percent": 0.6 }
+  ]
+}
