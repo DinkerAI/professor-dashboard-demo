@@ -32,10 +32,11 @@ separate page.
 
 An alternative instructor route for facilities that reward participation with
 Court Reserve discounts, credits, and member benefits rather than payroll.
-Instructors manage eligible classes and coverage; administrators curate access
-by category, play type, and any number of facility-defined instructor types,
-manage the roster and password-reset actions, and define what each point
-threshold unlocks.
+Instructors manage eligible classes and coverage. Administrators first admit a
+small program catalog from Court Reserve, then curate that focused set by play
+type and any number of facility-defined instructor types. The roster exposes
+each instructor’s history, level, and password-reset actions, while Incentives
+defines what each point threshold unlocks.
 
 ## Public-safety constraints
 

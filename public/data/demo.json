@@ -12,6 +12,27 @@
     "SK": "Sam Kim",
     "DP": "Devon Patel"
   },
+  "instructorHistory": {
+    "maya-torres": [
+      { "dayOffset": -4, "name": "Pickleball University 101", "points": 1, "status": "Completed" },
+      { "dayOffset": -9, "name": "Guided Open Play · Beginner", "points": 1, "status": "Completed" },
+      { "dayOffset": -15, "name": "Intro to Pickleball", "points": 1, "status": "Completed" }
+    ],
+    "jordan-lee": [
+      { "dayOffset": -3, "name": "Pickleball University 102", "points": 1, "status": "Completed" },
+      { "dayOffset": -11, "name": "Guided Open Play · Intermediate", "points": 1, "status": "Completed" }
+    ],
+    "avery-rivera": [
+      { "dayOffset": -7, "name": "Intro to Pickleball", "points": 1, "status": "Completed" }
+    ],
+    "sam-kim": [
+      { "dayOffset": -5, "name": "Pickleball University 102", "points": 1, "status": "Completed" },
+      { "dayOffset": -13, "name": "Guided Open Play · Intermediate", "points": 1, "status": "Completed" }
+    ],
+    "devon-patel": [
+      { "dayOffset": -6, "name": "Guided Open Play · Beginner", "points": 1, "status": "Completed" }
+    ]
+  },
   "rules": [
     "Play-type eligibility is curated by instructor level and can be changed without altering the Court Reserve event itself.",
     "Participation points unlock facility-defined discounts and member benefits; they are not payroll compensation.",
@@ -21,6 +42,16 @@
     "version": "Concept policy 1.2",
     "coverageWindowDays": 7,
     "maxAdvanceDays": 31,
+    "catalogScope": {
+      "Classes": {
+        "mode": "selected",
+        "playTypeIds": ["intro", "ppu-101", "ppu-102"]
+      },
+      "Open Play": {
+        "mode": "selected",
+        "playTypeIds": ["guided-beginner", "guided-intermediate"]
+      }
+    },
     "instructors": [
       {
         "id": "maya-torres",
@@ -206,22 +237,11 @@
         "achievement": "Foundation pathway complete",
         "allowedPlayTypeIds": [
           "intro",
-          "skills-clinic",
           "guided-beginner"
         ],
         "pointsByType": {
           "intro": 1,
-          "skills-clinic": 1,
           "guided-beginner": 1
-        },
-        "categoryModes": {
-          "Classes": "show",
-          "Clinics": "show",
-          "Open Play": "show",
-          "Events": "hide",
-          "Leagues": "hide",
-          "Camps": "hide",
-          "Social": "hide"
         }
       },
       {
@@ -233,7 +253,6 @@
         "achievement": "Core instructor pathway complete",
         "allowedPlayTypeIds": [
           "intro",
-          "skills-clinic",
           "ppu-101",
           "ppu-102",
           "guided-beginner",
@@ -241,20 +260,10 @@
         ],
         "pointsByType": {
           "intro": 1,
-          "skills-clinic": 1,
           "ppu-101": 1,
           "ppu-102": 1,
           "guided-beginner": 1,
           "guided-intermediate": 1
-        },
-        "categoryModes": {
-          "Classes": "show",
-          "Clinics": "show",
-          "Open Play": "show",
-          "Events": "restrict",
-          "Leagues": "hide",
-          "Camps": "hide",
-          "Social": "hide"
         }
       },
       {
@@ -266,40 +275,17 @@
         "achievement": "Lead instructor pathway complete",
         "allowedPlayTypeIds": [
           "intro",
-          "skills-clinic",
           "ppu-101",
           "ppu-102",
           "guided-beginner",
-          "guided-intermediate",
-          "guided-advanced",
-          "round-robin",
-          "ladder-league",
-          "junior-camp",
-          "social-play",
-          "special-event"
+          "guided-intermediate"
         ],
         "pointsByType": {
           "intro": 1,
-          "skills-clinic": 1,
           "ppu-101": 1,
           "ppu-102": 1,
           "guided-beginner": 1,
-          "guided-intermediate": 1,
-          "guided-advanced": 1.25,
-          "round-robin": 1.5,
-          "ladder-league": 1.5,
-          "junior-camp": 2,
-          "social-play": 0.5,
-          "special-event": 1
-        },
-        "categoryModes": {
-          "Classes": "show",
-          "Clinics": "show",
-          "Open Play": "show",
-          "Events": "show",
-          "Leagues": "show",
-          "Camps": "show",
-          "Social": "show"
+          "guided-intermediate": 1
         }
       }
     ]

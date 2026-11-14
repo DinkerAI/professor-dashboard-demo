@@ -93,6 +93,17 @@
       .sort((a, b) => a.localeCompare(b));
   }
 
+  function scopedPlayTypeIds(policy = state.data.policy) {
+    const scope = policy?.catalogScope || {};
+    const ids = new Set();
+    Object.entries(scope).forEach(([category, config]) => {
+      const categoryTypes = (policy?.playTypes || []).filter(type => type.category === category);
+      if (config.mode === 'all') categoryTypes.forEach(type => ids.add(type.id));
+      else (config.playTypeIds || []).forEach(id => ids.add(id));
+    });
+    return ids;
+  }
+
   function sortedIncentives(policy = state.data.policy) {
     return [...(policy?.incentives || [])]
       .sort((a, b) => Number(a.threshold || 0) - Number(b.threshold || 0));
@@ -111,6 +122,9 @@
       selectedTierId: data.profile.tierId,
       curationSection: 'access',
       curationSearch: '',
+      expandedInstructorId: null,
+      catalogSetupOpen: false,
+      catalogSetupDraft: null,
       policyDirty: false
     };
     render();
@@ -485,10 +499,6 @@
     return tier?.allowedPlayTypeIds?.length || 0;
   }
 
-  function categoryModeFor(tier, category) {
-    return tier?.categoryModes?.[category] || 'show';
-  }
-
   function renderTierSelector() {
     return `
       <section class="instructor-type-manager" aria-labelledby="instructor-types-title">
@@ -547,56 +557,83 @@
   }
 
   function renderCategoryAccess() {
-    const tier = selectedDraftTier();
+    const scope = state.policyDraft.catalogScope || {};
+    const entries = Object.entries(scope);
+    const scopedCount = scopedPlayTypeIds(state.policyDraft).size;
     return `
       <section class="curation-card category-access" aria-labelledby="category-access-title">
         <div class="curation-card__head">
           <div>
             <p class="eyebrow">Broad controls</p>
-            <h3 id="category-access-title">Category access</h3>
-            <p>Control how crowded categories appear below. Explicitly allowed play types always remain visible.</p>
+            <h3 id="category-access-title">Program catalog</h3>
+            <p>Only admitted categories and play types appear in the policy workspace.</p>
           </div>
+          <button type="button" class="secondary-button" data-action="open-catalog-setup">Configure catalog</button>
         </div>
-        <div class="category-policy-list">
-          ${policyCategories(state.policyDraft).map(category => {
-            const types = state.policyDraft.playTypes.filter(type => type.category === category);
-            const allowedCount = types.filter(type => tier?.allowedPlayTypeIds?.includes(type.id)).length;
-            const mode = categoryModeFor(tier, category);
+        <div class="catalog-scope-summary">
+          ${entries.map(([category, config]) => {
+            const count = config.mode === 'all'
+              ? state.policyDraft.playTypes.filter(type => type.category === category).length
+              : (config.playTypeIds || []).length;
             return `
-              <article class="category-policy-row">
-                <div>
-                  <strong>${escapeHtml(category)}</strong>
-                  <span>${allowedCount} allowed always visible · ${types.length - allowedCount} controlled</span>
-                </div>
-                <div class="category-mode-buttons">
-                  <button type="button" class="mini-policy-button ${mode === 'show' ? 'is-active' : ''}" data-action="set-category-mode" data-category="${escapeHtml(category)}" data-category-mode="show">Show all</button>
-                  <button type="button" class="mini-policy-button ${mode === 'restrict' ? 'is-active is-restricted' : ''}" data-action="set-category-mode" data-category="${escapeHtml(category)}" data-category-mode="restrict">Restrict others</button>
-                  <button type="button" class="mini-policy-button ${mode === 'hide' ? 'is-active is-hidden' : ''}" data-action="set-category-mode" data-category="${escapeHtml(category)}" data-category-mode="hide">Hide others</button>
-                </div>
+              <article class="catalog-scope-chip">
+                <strong>${escapeHtml(category)}</strong>
+                <span>${config.mode === 'all' ? 'Entire category' : `${count} selected play type${count === 1 ? '' : 's'}`}</span>
               </article>
             `;
-          }).join('')}
+          }).join('') || '<div class="empty-state">No Court Reserve categories are admitted yet.</div>'}
         </div>
+        <p class="catalog-scope-count">${scopedCount} play type${scopedCount === 1 ? '' : 's'} available for instructor-type policies.</p>
       </section>
+    `;
+  }
+
+  function renderPolicyPlayTypeRow(type, tier) {
+    const allowed = tier?.allowedPlayTypeIds?.includes(type.id);
+    const points = tier?.pointsByType?.[type.id] ?? type.defaultPoints;
+    return `
+      <article class="play-type-row ${allowed ? 'is-allowed' : 'is-restricted'}">
+        <div class="play-type-main">
+          <span>${type.futureEvents} future events</span>
+          <strong>${escapeHtml(type.name)}</strong>
+          <small>${escapeHtml(type.staffing)}</small>
+        </div>
+        <label class="points-field">
+          <span>Points</span>
+          <input type="number" min="0" step="0.25" data-policy-points data-play-type-id="${escapeHtml(type.id)}" value="${escapeHtml(points)}" ${allowed ? '' : 'disabled'} />
+        </label>
+        <button
+          type="button"
+          class="policy-toggle ${allowed ? 'is-allowed' : 'is-restricted'}"
+          data-action="toggle-play-type"
+          data-play-type-id="${escapeHtml(type.id)}"
+          aria-pressed="${allowed}"
+        >
+          <span aria-hidden="true"></span>${allowed ? 'Allowed' : 'Restricted'}
+        </button>
+      </article>
     `;
   }
 
   function renderCurationCatalog() {
     const tier = selectedDraftTier();
     const query = state.curationSearch.trim().toLowerCase();
+    const scopedIds = scopedPlayTypeIds(state.policyDraft);
     const playTypes = state.policyDraft.playTypes.filter(type => {
-      const allowed = tier?.allowedPlayTypeIds?.includes(type.id);
-      if (categoryModeFor(tier, type.category) === 'hide' && !allowed) return false;
+      if (!scopedIds.has(type.id)) return false;
       if (!query) return true;
       return `${type.name} ${type.category} ${type.source}`.toLowerCase().includes(query);
     });
+    const groups = policyCategories(state.policyDraft)
+      .map(category => ({ category, types: playTypes.filter(type => type.category === category) }))
+      .filter(group => group.types.length);
     return `
       <section class="curation-card curation-catalog" aria-labelledby="catalog-title">
         <div class="curation-card__head">
           <div>
             <p class="eyebrow">Court Reserve source catalog</p>
             <h3 id="catalog-title">Play-type access</h3>
-            <p>Allow or restrict an imported play type for ${escapeHtml(tier?.label || 'this level')}. The catalog remains owned by Court Reserve.</p>
+            <p>Allow or restrict the facility’s admitted play types for ${escapeHtml(tier?.label || 'this level')}.</p>
           </div>
           <div class="catalog-actions">
             <button type="button" class="secondary-button" data-action="allow-all">Allow all</button>
@@ -608,32 +645,15 @@
           <input type="search" data-curation-search value="${escapeHtml(state.curationSearch)}" placeholder="Search classes, leagues, clinics…" />
         </label>
         <div class="play-type-list">
-          ${playTypes.map(type => {
-            const allowed = tier?.allowedPlayTypeIds?.includes(type.id);
-            const points = tier?.pointsByType?.[type.id] ?? type.defaultPoints;
-            return `
-              <article class="play-type-row ${allowed ? 'is-allowed' : 'is-restricted'}">
-                <div class="play-type-main">
-                  <span>${escapeHtml(type.category)} · ${type.futureEvents} future</span>
-                  <strong>${escapeHtml(type.name)}</strong>
-                  <small>${escapeHtml(type.staffing)}</small>
-                </div>
-                <label class="points-field">
-                  <span>Points</span>
-                  <input type="number" min="0" step="0.25" data-policy-points data-play-type-id="${escapeHtml(type.id)}" value="${escapeHtml(points)}" ${allowed ? '' : 'disabled'} />
-                </label>
-                <button
-                  type="button"
-                  class="policy-toggle ${allowed ? 'is-allowed' : 'is-restricted'}"
-                  data-action="toggle-play-type"
-                  data-play-type-id="${escapeHtml(type.id)}"
-                  aria-pressed="${allowed}"
-                >
-                  <span aria-hidden="true"></span>${allowed ? 'Allowed' : 'Restricted'}
-                </button>
-              </article>
-            `;
-          }).join('') || '<div class="empty-state">No play types match this search.</div>'}
+          ${groups.map(group => `
+            <section class="play-type-group">
+              <div class="play-type-group__heading">
+                <strong>${escapeHtml(group.category)}</strong>
+                <span>${group.types.length} admitted</span>
+              </div>
+              ${group.types.map(type => renderPolicyPlayTypeRow(type, tier)).join('')}
+            </section>
+          `).join('') || '<div class="empty-state">No admitted play types match this search.</div>'}
         </div>
       </section>
     `;
@@ -666,7 +686,7 @@
           </div>
           <div class="policy-summary">
             <div><strong>${draftAllowedCount()}</strong><span>Allowed</span></div>
-            <div><strong>${state.policyDraft.playTypes.length - draftAllowedCount()}</strong><span>Restricted</span></div>
+            <div><strong>${Math.max(0, scopedPlayTypeIds(state.policyDraft).size - draftAllowedCount())}</strong><span>Restricted</span></div>
             <div><strong>${formatNumber(tier?.monthlyTargetPoints)}</strong><span>Target</span></div>
           </div>
           <button type="button" class="secondary-button preview-button" data-action="preview-tier">
@@ -688,7 +708,34 @@
       </div>
       <div class="concept-boundary" role="note">
         <strong>Court Reserve remains the source</strong>
-        Categories, play types, and scheduled classes are read from Court Reserve. This layer only allows or restricts eligibility and assigns participation-point values; it cannot create, rename, or delete the underlying catalog or classes.
+        Categories, play types, and scheduled classes are read from Court Reserve. Catalog setup admits a small working subset; instructor-type policies then allow or restrict only that subset.
+      </div>
+    `;
+  }
+
+  function renderInstructorAdminHistory(instructor) {
+    const entries = state.data.instructorHistory?.[instructor.id] || [];
+    const totalPoints = entries.reduce((sum, entry) => sum + Number(entry.points || 0), 0);
+    return `
+      <div class="roster-history" id="history-${escapeHtml(instructor.id)}">
+        <div class="roster-history__summary">
+          <div><strong>${entries.length}</strong><span>Completed assignments</span></div>
+          <div><strong>${formatNumber(totalPoints)}</strong><span>Program points</span></div>
+          <div><strong>${escapeHtml(tierById(state.policyDraft, instructor.tierId)?.label || 'Unassigned')}</strong><span>Current type</span></div>
+        </div>
+        <div class="roster-history__list">
+          ${entries.map(entry => {
+            const date = startOfToday();
+            date.setDate(date.getDate() + Number(entry.dayOffset || 0));
+            return `
+              <div class="roster-history__row">
+                <div><strong>${escapeHtml(entry.name)}</strong><span>${formatDay(date)}</span></div>
+                <span>${escapeHtml(entry.status || 'Completed')}</span>
+                <strong>${formatNumber(entry.points)} pt</strong>
+              </div>
+            `;
+          }).join('') || '<div class="empty-state">No completed program activity yet.</div>'}
+        </div>
       </div>
     `;
   }
@@ -708,22 +755,25 @@
           </div>
           <div class="roster-list">
             ${instructors.map(instructor => `
-              <article class="roster-row">
-                <div class="roster-avatar">${escapeHtml(instructor.initials)}</div>
-                <div class="roster-person">
-                  <strong>${escapeHtml(instructor.name)}</strong>
-                  <span>${escapeHtml(instructor.email)}</span>
+              <article class="roster-entry ${state.expandedInstructorId === instructor.id ? 'is-expanded' : ''}">
+                <div class="roster-row">
+                  <div class="roster-avatar">${escapeHtml(instructor.initials)}</div>
+                  <button type="button" class="roster-person roster-person-button" data-action="toggle-instructor-history" data-instructor-id="${escapeHtml(instructor.id)}" aria-expanded="${state.expandedInstructorId === instructor.id}" aria-controls="history-${escapeHtml(instructor.id)}">
+                    <strong>${escapeHtml(instructor.name)}</strong>
+                    <span>${escapeHtml(instructor.email)} · ${state.expandedInstructorId === instructor.id ? 'Hide history' : 'View history'}</span>
+                  </button>
+                  <label>
+                    <span>Level</span>
+                    <select data-instructor-tier data-instructor-id="${escapeHtml(instructor.id)}">
+                      ${state.policyDraft.tiers.map(tier => `<option value="${escapeHtml(tier.id)}" ${tier.id === instructor.tierId ? 'selected' : ''}>${escapeHtml(tier.label)}</option>`).join('')}
+                    </select>
+                  </label>
+                  <div class="roster-actions">
+                    <button type="button" class="reset-button" data-action="reset-password" data-instructor-id="${escapeHtml(instructor.id)}">Reset password</button>
+                    <button type="button" class="remove-button" data-action="remove-instructor" data-instructor-id="${escapeHtml(instructor.id)}">Remove</button>
+                  </div>
                 </div>
-                <label>
-                  <span>Level</span>
-                  <select data-instructor-tier data-instructor-id="${escapeHtml(instructor.id)}">
-                    ${state.policyDraft.tiers.map(tier => `<option value="${escapeHtml(tier.id)}" ${tier.id === instructor.tierId ? 'selected' : ''}>${escapeHtml(tier.label)}</option>`).join('')}
-                  </select>
-                </label>
-                <div class="roster-actions">
-                  <button type="button" class="reset-button" data-action="reset-password" data-instructor-id="${escapeHtml(instructor.id)}">Reset password</button>
-                  <button type="button" class="remove-button" data-action="remove-instructor" data-instructor-id="${escapeHtml(instructor.id)}">Remove</button>
-                </div>
+                ${state.expandedInstructorId === instructor.id ? renderInstructorAdminHistory(instructor) : ''}
               </article>
             `).join('') || '<div class="empty-state">No instructors are enrolled in the participation program.</div>'}
           </div>
@@ -804,6 +854,65 @@
     `;
   }
 
+  function renderCatalogSetupDialog() {
+    if (!state.catalogSetupOpen) return '';
+    const draft = state.catalogSetupDraft || {};
+    return `
+      <div class="catalog-modal-backdrop">
+        <section class="catalog-modal" role="dialog" aria-modal="true" aria-labelledby="catalog-modal-title">
+          <header class="catalog-modal__header">
+            <div>
+              <p class="eyebrow">Initial program setup</p>
+              <h2 id="catalog-modal-title">Choose the program catalog</h2>
+              <p>Admit only the Court Reserve categories and play types this facility wants instructors to claim.</p>
+            </div>
+            <button type="button" class="modal-close" data-action="close-catalog-setup" aria-label="Close catalog setup">×</button>
+          </header>
+          <div class="catalog-setup-list">
+            ${policyCategories(state.policyDraft).map(category => {
+              const config = draft[category];
+              const included = Boolean(config);
+              const types = state.policyDraft.playTypes.filter(type => type.category === category);
+              const selected = new Set(config?.playTypeIds || []);
+              return `
+                <article class="catalog-setup-category ${included ? 'is-included' : ''}">
+                  <div class="catalog-setup-category__head">
+                    <div>
+                      <strong>${escapeHtml(category)}</strong>
+                      <span>${types.length} Court Reserve play type${types.length === 1 ? '' : 's'}</span>
+                    </div>
+                    <button type="button" class="scope-toggle ${included ? 'is-included' : ''}" data-action="toggle-catalog-category" data-category="${escapeHtml(category)}">${included ? 'Included' : 'Add category'}</button>
+                  </div>
+                  ${included ? `
+                    <div class="scope-mode-row">
+                      <button type="button" class="mini-policy-button ${config.mode === 'all' ? 'is-active' : ''}" data-action="set-catalog-category-mode" data-category="${escapeHtml(category)}" data-scope-mode="all">Everything in ${escapeHtml(category)}</button>
+                      <button type="button" class="mini-policy-button ${config.mode === 'selected' ? 'is-active' : ''}" data-action="set-catalog-category-mode" data-category="${escapeHtml(category)}" data-scope-mode="selected">Choose play types</button>
+                    </div>
+                    <div class="scope-play-types ${config.mode === 'all' ? 'is-all' : ''}">
+                      ${types.map(type => `
+                        <label>
+                          <input type="checkbox" data-scope-play-type data-category="${escapeHtml(category)}" data-play-type-id="${escapeHtml(type.id)}" ${config.mode === 'all' || selected.has(type.id) ? 'checked' : ''} ${config.mode === 'all' ? 'disabled' : ''} />
+                          <span>${escapeHtml(type.name)}</span>
+                        </label>
+                      `).join('')}
+                    </div>
+                  ` : ''}
+                </article>
+              `;
+            }).join('')}
+          </div>
+          <footer class="catalog-modal__footer">
+            <p>This determines what enters the policy workspace; it does not modify Court Reserve.</p>
+            <div>
+              <button type="button" class="secondary-button" data-action="close-catalog-setup">Cancel</button>
+              <button type="button" class="primary-button" data-action="apply-catalog-setup">Use this catalog</button>
+            </div>
+          </footer>
+        </section>
+      </div>
+    `;
+  }
+
   function renderCurationView() {
     const publishedTier = tierById(state.data.policy, state.selectedTierId);
     const draftTier = selectedDraftTier();
@@ -835,6 +944,7 @@
             ? renderIncentiveAdministration()
             : renderAccessAdministration()}
       </section>
+      ${renderCatalogSetupDialog()}
     `;
   }
 
@@ -959,7 +1069,7 @@
 
   function toggleDraftPlayType(id) {
     const tier = selectedDraftTier();
-    if (!tier) return;
+    if (!tier || !scopedPlayTypeIds(state.policyDraft).has(id)) return;
     const allowed = new Set(tier.allowedPlayTypeIds || []);
     if (allowed.has(id)) allowed.delete(id);
     else allowed.add(id);
@@ -974,9 +1084,10 @@
   function setAllDraftPlayTypes(allowed) {
     const tier = selectedDraftTier();
     if (!tier) return;
-    tier.allowedPlayTypeIds = allowed ? state.policyDraft.playTypes.map(type => type.id) : [];
+    const scopedIds = scopedPlayTypeIds(state.policyDraft);
+    tier.allowedPlayTypeIds = allowed ? Array.from(scopedIds) : [];
     if (allowed) {
-      state.policyDraft.playTypes.forEach(type => {
+      state.policyDraft.playTypes.filter(type => scopedIds.has(type.id)).forEach(type => {
         if (!(type.id in tier.pointsByType)) tier.pointsByType[type.id] = type.defaultPoints ?? 1;
       });
     }
@@ -984,13 +1095,73 @@
     render();
   }
 
-  function setCategoryMode(category, mode) {
-    const tier = selectedDraftTier();
-    if (!tier || !['show', 'restrict', 'hide'].includes(mode)) return;
-    if (!tier.categoryModes) tier.categoryModes = {};
-    tier.categoryModes[category] = mode;
+  function openCatalogSetup() {
+    state.catalogSetupDraft = clone(state.policyDraft.catalogScope || {});
+    state.catalogSetupOpen = true;
+    render();
+  }
+
+  function closeCatalogSetup() {
+    state.catalogSetupOpen = false;
+    state.catalogSetupDraft = null;
+    render();
+  }
+
+  function toggleCatalogCategory(category) {
+    if (!state.catalogSetupDraft) return;
+    if (state.catalogSetupDraft[category]) delete state.catalogSetupDraft[category];
+    else {
+      const firstType = state.policyDraft.playTypes.find(type => type.category === category);
+      state.catalogSetupDraft[category] = {
+        mode: 'selected',
+        playTypeIds: firstType ? [firstType.id] : []
+      };
+    }
+    render();
+  }
+
+  function setCatalogCategoryMode(category, mode) {
+    const config = state.catalogSetupDraft?.[category];
+    if (!config || !['all', 'selected'].includes(mode)) return;
+    config.mode = mode;
+    if (mode === 'selected' && !(config.playTypeIds || []).length) {
+      const firstType = state.policyDraft.playTypes.find(type => type.category === category);
+      config.playTypeIds = firstType ? [firstType.id] : [];
+    }
+    render();
+  }
+
+  function setCatalogPlayType(category, id, checked) {
+    const config = state.catalogSetupDraft?.[category];
+    if (!config) return;
+    const selected = new Set(config.playTypeIds || []);
+    if (checked) selected.add(id);
+    else selected.delete(id);
+    config.playTypeIds = Array.from(selected);
+    config.mode = 'selected';
+    render();
+  }
+
+  function applyCatalogSetup() {
+    const nextScope = clone(state.catalogSetupDraft || {});
+    Object.entries(nextScope).forEach(([category, config]) => {
+      if (config.mode === 'selected' && !(config.playTypeIds || []).length) delete nextScope[category];
+    });
+    const nextPolicy = { ...state.policyDraft, catalogScope: nextScope };
+    const scopedIds = scopedPlayTypeIds(nextPolicy);
+    if (!scopedIds.size) {
+      showAlert('Choose at least one category or play type for the program catalog.');
+      return;
+    }
+    state.policyDraft.catalogScope = nextScope;
+    state.policyDraft.tiers.forEach(tier => {
+      tier.allowedPlayTypeIds = (tier.allowedPlayTypeIds || []).filter(id => scopedIds.has(id));
+    });
+    state.catalogSetupOpen = false;
+    state.catalogSetupDraft = null;
     markPolicyDirty();
     render();
+    showAlert(`${scopedIds.size} Court Reserve play types admitted to the draft program catalog.`);
   }
 
   function publishPolicy() {
@@ -1007,6 +1178,8 @@
   function resetPolicyDraft() {
     state.policyDraft = clone(state.data.policy);
     state.policyDirty = false;
+    state.catalogSetupOpen = false;
+    state.catalogSetupDraft = null;
     if (!tierById(state.policyDraft, state.selectedTierId)) {
       state.selectedTierId = state.data.profile.tierId;
     }
@@ -1038,8 +1211,7 @@
       rolloverCap: 5,
       achievement: `${label} pathway complete`,
       allowedPlayTypeIds: [],
-      pointsByType: {},
-      categoryModes: {}
+      pointsByType: {}
     });
     state.selectedTierId = id;
     markPolicyDirty();
@@ -1069,6 +1241,8 @@
       tierId,
       status: 'Active'
     });
+    if (!state.data.instructorHistory) state.data.instructorHistory = {};
+    state.data.instructorHistory[id] = [];
     markPolicyDirty();
     render();
     showAlert(`${name} added to the draft participation roster.`);
@@ -1078,6 +1252,7 @@
     const instructor = (state.policyDraft.instructors || []).find(item => item.id === id);
     if (!instructor) return;
     state.policyDraft.instructors = state.policyDraft.instructors.filter(item => item.id !== id);
+    if (state.expandedInstructorId === id) state.expandedInstructorId = null;
     markPolicyDirty();
     render();
     showAlert(`${instructor.name} removed from the draft participation roster.`);
@@ -1087,6 +1262,11 @@
     const instructor = (state.policyDraft.instructors || []).find(item => item.id === id);
     if (!instructor) return;
     showAlert(`Password reset simulated for ${instructor.name}. No email was sent.`);
+  }
+
+  function toggleInstructorHistory(id) {
+    state.expandedInstructorId = state.expandedInstructorId === id ? null : id;
+    render();
   }
 
   function addIncentive(form) {
@@ -1129,7 +1309,7 @@
     }
     const actionTarget = event.target.closest('[data-action]');
     if (!actionTarget) return;
-    const { action, view, filter, classId, tierId, playTypeId, section, category, categoryMode, instructorId, incentiveId } = actionTarget.dataset;
+    const { action, view, filter, classId, tierId, playTypeId, section, category, scopeMode, instructorId, incentiveId } = actionTarget.dataset;
     if (action === 'set-view') setView(view);
     if (action === 'toggle-filter') toggleFilter(filter);
     if (action === 'toggle-class') toggleClass(classId);
@@ -1141,13 +1321,18 @@
     if (action === 'toggle-play-type') toggleDraftPlayType(playTypeId);
     if (action === 'allow-all') setAllDraftPlayTypes(true);
     if (action === 'restrict-all') setAllDraftPlayTypes(false);
-    if (action === 'set-category-mode') setCategoryMode(category, categoryMode);
+    if (action === 'open-catalog-setup') openCatalogSetup();
+    if (action === 'close-catalog-setup') closeCatalogSetup();
+    if (action === 'toggle-catalog-category') toggleCatalogCategory(category);
+    if (action === 'set-catalog-category-mode') setCatalogCategoryMode(category, scopeMode);
+    if (action === 'apply-catalog-setup') applyCatalogSetup();
     if (action === 'set-curation-section') {
       state.curationSection = section;
       render();
     }
     if (action === 'remove-instructor') removeInstructor(instructorId);
     if (action === 'reset-password') resetInstructorPassword(instructorId);
+    if (action === 'toggle-instructor-history') toggleInstructorHistory(instructorId);
     if (action === 'remove-incentive') removeIncentive(incentiveId);
     if (action === 'publish-policy') publishPolicy();
     if (action === 'reset-policy-draft') resetPolicyDraft();
@@ -1157,6 +1342,14 @@
   function handlePolicyChange(event) {
     const tier = selectedDraftTier();
     if (!tier) return;
+    if (event.target.matches('[data-scope-play-type]')) {
+      setCatalogPlayType(
+        event.target.dataset.category,
+        event.target.dataset.playTypeId,
+        event.target.checked
+      );
+      return;
+    }
     if (event.target.matches('[data-policy-points]')) {
       tier.pointsByType[event.target.dataset.playTypeId] = Math.max(0, Number(event.target.value || 0));
       markPolicyDirty();
@@ -1350,6 +1543,9 @@
   });
   window.addEventListener('scroll', scheduleCollector, { passive: true });
   window.addEventListener('resize', recaptureCollectorAfterResize);
+  window.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && state?.catalogSetupOpen) closeCatalogSetup();
+  });
 
   init();
 })();

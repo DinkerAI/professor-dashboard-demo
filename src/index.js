@@ -53,7 +53,9 @@ export default {
           'instructor name reveal',
           'instructor-level policy curation',
           'category and play-type access controls',
+          'facility-scoped program catalog setup',
           'instructor roster administration',
+          'per-instructor program history',
           'play-type point mapping',
           'discount and member-benefit incentives'
         ],

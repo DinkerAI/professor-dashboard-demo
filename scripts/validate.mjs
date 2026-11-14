@@ -59,12 +59,22 @@ if (!Array.isArray(data.policy?.incentives) || data.policy.incentives.length < 1
 }
 const playTypeIds = new Set(data.policy.playTypes.map(type => type.id));
 const tierIds = new Set(data.policy.tiers.map(tier => tier.id));
+const scopedPlayTypeIds = new Set();
+for (const [category, config] of Object.entries(data.policy.catalogScope || {})) {
+  const categoryTypes = data.policy.playTypes.filter(type => type.category === category);
+  if (!categoryTypes.length) throw new Error(`Unknown scoped category ${category}.`);
+  if (!['all', 'selected'].includes(config.mode)) throw new Error(`Invalid scope mode for ${category}.`);
+  const ids = config.mode === 'all' ? categoryTypes.map(type => type.id) : config.playTypeIds || [];
+  for (const id of ids) {
+    if (!playTypeIds.has(id)) throw new Error(`Unknown scoped play type ${id}.`);
+    scopedPlayTypeIds.add(id);
+  }
+}
+if (!scopedPlayTypeIds.size) throw new Error('The program catalog scope is empty.');
 for (const tier of data.policy.tiers) {
   for (const id of tier.allowedPlayTypeIds) {
     if (!playTypeIds.has(id)) throw new Error(`Unknown play type ${id} in ${tier.id}.`);
-  }
-  for (const mode of Object.values(tier.categoryModes || {})) {
-    if (!['show', 'restrict', 'hide'].includes(mode)) throw new Error(`Invalid category mode in ${tier.id}.`);
+    if (!scopedPlayTypeIds.has(id)) throw new Error(`Out-of-scope play type ${id} in ${tier.id}.`);
   }
 }
 for (const instructor of data.policy.instructors) {
@@ -76,16 +86,17 @@ for (const incentive of data.policy.incentives) {
   }
 }
 if (
-  !browserJs.includes('setCategoryMode') ||
+  !browserJs.includes('openCatalogSetup') ||
+  !browserJs.includes('applyCatalogSetup') ||
+  !browserJs.includes('renderCatalogSetupDialog') ||
+  !browserJs.includes('renderInstructorAdminHistory') ||
+  !browserJs.includes('toggleInstructorHistory') ||
   !browserJs.includes('renderIncentiveAdministration') ||
   !browserJs.includes('addInstructorType') ||
   !browserJs.includes('resetInstructorPassword') ||
   !browserJs.includes('captureCollectorLayouts')
 ) {
   throw new Error('Program administration behaviors are missing.');
-}
-if (!browserJs.includes("categoryModeFor(tier, type.category) === 'hide' && !allowed")) {
-  throw new Error('Allowed play types must override category hiding.');
 }
 const accessPanelSource = browserJs.slice(
   browserJs.indexOf('function renderAccessAdministration'),

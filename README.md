@@ -27,11 +27,13 @@ benefits—not payroll compensation.
 
 ### Program administration
 
-- category-level show/restrict/hide controls that never conceal an allowed play type;
-- individual play-type allow/restrict controls;
+- a separate catalog-setup dialog for admitting only selected Court Reserve categories or play types;
+- a focused policy workspace that only shows the admitted program catalog;
+- individual play-type allow/restrict controls inside that catalog;
 - unlimited facility-defined instructor types with selectable policies;
 - per-level point values, monthly targets, and rollover caps;
-- a participation roster with add, level-change, password-reset, and remove controls;
+- an expandable participation roster with per-instructor history, level-change,
+  password-reset, and remove controls;
 - editable incentive thresholds and benefit descriptions; and
 - draft, discard, publish, and instructor-preview interactions.
 
