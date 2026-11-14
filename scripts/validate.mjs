@@ -99,10 +99,15 @@ for (const conversion of data.policy.conversions) {
   if (!['membership', 'play-type'].includes(conversion.outcomeType)) {
     throw new Error(`Invalid outcome type for ${conversion.id}.`);
   }
-  const validOutcome = conversion.outcomeType === 'membership'
-    ? membershipIds.has(conversion.outcomeId)
-    : playTypeIds.has(conversion.outcomeId);
-  if (!validOutcome) throw new Error(`Invalid outcome for ${conversion.id}.`);
+  if (!Array.isArray(conversion.outcomeIds) || conversion.outcomeIds.length < 1) {
+    throw new Error(`Conversion ${conversion.id} needs at least one destination.`);
+  }
+  for (const outcomeId of conversion.outcomeIds) {
+    const validOutcome = conversion.outcomeType === 'membership'
+      ? membershipIds.has(outcomeId)
+      : playTypeIds.has(outcomeId);
+    if (!validOutcome) throw new Error(`Invalid outcome ${outcomeId} for ${conversion.id}.`);
+  }
   if (Number(conversion.windowValue) < 1 || !['hours', 'days'].includes(conversion.windowUnit)) {
     throw new Error(`Invalid attribution window for ${conversion.id}.`);
   }
@@ -117,6 +122,8 @@ if (
   !browserJs.includes('renderConversionAdministration') ||
   !browserJs.includes('addConversion') ||
   !browserJs.includes('data-conversion-field') ||
+  !browserJs.includes('data-conversion-destination') ||
+  !browserJs.includes('setConversionDestination') ||
   !browserJs.includes('renderIncentiveAdministration') ||
   !browserJs.includes('addInstructorType') ||
   !browserJs.includes('resetInstructorPassword') ||

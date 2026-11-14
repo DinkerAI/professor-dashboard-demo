@@ -855,14 +855,22 @@
     `;
   }
 
-  function conversionOutcomeOptions(conversion) {
-    if (conversion.outcomeType === 'play-type') {
-      return state.policyDraft.playTypes.map(type => `
-        <option value="${escapeHtml(type.id)}" ${type.id === conversion.outcomeId ? 'selected' : ''}>${escapeHtml(type.name)}</option>
-      `).join('');
-    }
-    return (state.policyDraft.membershipTypes || []).map(membership => `
-      <option value="${escapeHtml(membership.id)}" ${membership.id === conversion.outcomeId ? 'selected' : ''}>${escapeHtml(membership.name)}</option>
+  function renderConversionDestinations(conversion) {
+    const selected = new Set(conversion.outcomeIds || []);
+    const choices = conversion.outcomeType === 'play-type'
+      ? state.policyDraft.playTypes.map(type => ({ id: type.id, name: type.name }))
+      : (state.policyDraft.membershipTypes || []);
+    return choices.map(choice => `
+      <label>
+        <input
+          type="checkbox"
+          data-conversion-destination
+          data-conversion-id="${escapeHtml(conversion.id)}"
+          data-destination-id="${escapeHtml(choice.id)}"
+          ${selected.has(choice.id) ? 'checked' : ''}
+        />
+        <span>${escapeHtml(choice.name)}</span>
+      </label>
     `).join('');
   }
 
@@ -906,10 +914,10 @@
                       <option value="play-type" ${conversion.outcomeType === 'play-type' ? 'selected' : ''}>Another class type</option>
                     </select>
                   </label>
-                  <label>
-                    <span>Destination</span>
-                    <select data-conversion-field="outcomeId" data-conversion-id="${escapeHtml(conversion.id)}">${conversionOutcomeOptions(conversion)}</select>
-                  </label>
+                  <div class="conversion-destination-picker">
+                    <span>Destinations · choose one or more</span>
+                    <div class="conversion-destination-options">${renderConversionDestinations(conversion)}</div>
+                  </div>
                 </div>
                 <div class="conversion-terms">
                   <div class="conversion-window">
@@ -1421,7 +1429,7 @@
       name,
       sourcePlayTypeId,
       outcomeType: 'membership',
-      outcomeId: defaultMembership,
+      outcomeIds: defaultMembership ? [defaultMembership] : [],
       windowValue: 2,
       windowUnit: 'days',
       pointMultiplier: 1.5
@@ -1438,6 +1446,22 @@
     markPolicyDirty();
     render();
     showAlert(`${conversion.name} removed from the draft conversion rules.`);
+  }
+
+  function setConversionDestination(id, destinationId, checked) {
+    const conversion = (state.policyDraft.conversions || []).find(rule => rule.id === id);
+    if (!conversion) return;
+    const selected = new Set(conversion.outcomeIds || []);
+    if (checked) selected.add(destinationId);
+    else if (selected.size > 1) selected.delete(destinationId);
+    else {
+      showAlert('Each conversion rule needs at least one destination.');
+      render();
+      return;
+    }
+    conversion.outcomeIds = Array.from(selected);
+    markPolicyDirty();
+    render();
   }
 
   function handleClick(event) {
@@ -1492,6 +1516,14 @@
       );
       return;
     }
+    if (event.target.matches('[data-conversion-destination]')) {
+      setConversionDestination(
+        event.target.dataset.conversionId,
+        event.target.dataset.destinationId,
+        event.target.checked
+      );
+      return;
+    }
     if (event.target.matches('[data-policy-points]')) {
       tier.pointsByType[event.target.dataset.playTypeId] = Math.max(0, Number(event.target.value || 0));
       markPolicyDirty();
@@ -1540,9 +1572,10 @@
         ? Math.max(field === 'windowValue' ? 1 : 0, Number(event.target.value || 0))
         : event.target.value;
       if (field === 'outcomeType') {
-        conversion.outcomeId = conversion.outcomeType === 'play-type'
+        const defaultOutcome = conversion.outcomeType === 'play-type'
           ? state.policyDraft.playTypes[0]?.id || ''
           : state.policyDraft.membershipTypes?.[0]?.id || '';
+        conversion.outcomeIds = defaultOutcome ? [defaultOutcome] : [];
       }
       markPolicyDirty();
       render();

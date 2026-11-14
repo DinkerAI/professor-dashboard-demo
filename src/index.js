@@ -58,7 +58,7 @@ export default {
           'per-instructor program history',
           'play-type point mapping',
           'discount and member-benefit incentives',
-          'membership and class conversion attribution',
+          'multi-destination membership and class conversion attribution',
           'conversion-window point multipliers'
         ],
         limitations: [

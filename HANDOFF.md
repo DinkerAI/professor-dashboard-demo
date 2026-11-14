@@ -37,8 +37,9 @@ small program catalog from Court Reserve, then curate that focused set by play
 type and any number of facility-defined instructor types. The roster exposes
 each instructor’s history, level, and password-reset actions, while Incentives
 defines what each point threshold unlocks. Conversions separately maps an
-instructor-led starting point to a membership or follow-on class, with an
-hours/days attribution window and configurable point multiplier.
+instructor-led starting point to one or more membership types or follow-on
+classes, with an hours/days attribution window and configurable point
+multiplier.
 
 ## Public-safety constraints
 
