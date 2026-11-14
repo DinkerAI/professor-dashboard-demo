@@ -47,7 +47,9 @@ const requiredHubMarkers = [
 const requiredDemoMarkers = [
   'Court Reserve Instructor Dashboard',
   'Program administration',
-  'Fictional demo · no live connection'
+  'Fictional demo · no live connection',
+  'class="product-header"',
+  'class="concept-note"'
 ];
 
 const requiredTournamentMarkers = [
@@ -82,11 +84,22 @@ if (!Array.isArray(tournamentData.scenarios) || tournamentData.scenarios.length 
 if (!Array.isArray(tournamentData.calculationRows) || tournamentData.calculationRows.length < 3) {
   throw new Error('The tournament demo calculation model is incomplete.');
 }
+if (Number(tournamentData.grid?.courts) < 1) {
+  throw new Error('The tournament demo must start with at least one court.');
+}
+for (const field of ['poolMatchMinutes', 'championshipMatchMinutes', 'bronzeMatchMinutes', 'goldMatchMinutes']) {
+  if (Number(tournamentData.grid?.[field]) < 5) throw new Error(`Invalid tournament runtime field: ${field}.`);
+}
 if (
   !tournamentJs.includes('calculateScenario') ||
   !tournamentJs.includes('solvePlayersForHours') ||
   !tournamentJs.includes('addCalculationRow') ||
-  !tournamentJs.includes('renderDivisionSpread')
+  !tournamentJs.includes('renderDivisionSpread') ||
+  !tournamentJs.includes('projectedDivisionSpread') ||
+  !tournamentJs.includes('combineDivisionSpreadByAge') ||
+  !tournamentJs.includes("state.targetHours = calculateOperations(state.players).hours") ||
+  !tournamentJs.includes('courts: 1') ||
+  !tournamentJs.includes('championshipMatchMinutes')
 ) {
   throw new Error('Tournament calculator behaviors are missing.');
 }

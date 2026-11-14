@@ -65,7 +65,7 @@ button {
 .site-header,
 .site-footer,
 .demo-wrap {
-  width: min(1440px, calc(100% - 40px));
+  width: min(1500px, calc(100% - 36px));
   margin-inline: auto;
 }
 
@@ -153,7 +153,7 @@ button {
 
 .demo-wrap {
   padding-top: 28px;
-  padding-bottom: 60px;
+  padding-bottom: 58px;
 }
 
 .demo-shell {
@@ -209,46 +209,58 @@ button {
 }
 
 .product-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 24px clamp(20px, 4vw, 52px);
-  background: var(--white);
-  border-bottom: 1px solid var(--line);
+  gap: 18px;
+  padding: 14px clamp(18px, 3vw, 38px);
+  color: #e7eee9;
+  background: #10231c;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.product-header .library-link {
+  margin: 0;
+  color: #bdcac3;
+  font-size: 0.72rem;
+}
+
+.product-header .library-link:hover {
+  color: var(--white);
 }
 
 .brand-lockup {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 11px;
 }
 
 .brand-monogram {
   display: grid;
-  width: 48px;
-  height: 48px;
+  width: 38px;
+  height: 38px;
   flex: 0 0 auto;
   place-items: center;
   color: var(--white);
-  background: linear-gradient(145deg, #0d7450, #163b56);
-  border-radius: 13px;
-  font-size: 0.9rem;
+  background: var(--green);
+  border-radius: 10px;
+  font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: -0.03em;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 .brand-name {
-  color: var(--green-dark);
-  font-size: 0.67rem;
+  color: #8fd7b4;
+  font-size: 0.56rem;
   font-weight: 900;
   letter-spacing: 0.12em;
 }
 
 .product-header h2 {
   margin: 1px 0 0;
-  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  color: #e7eee9;
+  font-size: 0.92rem;
   letter-spacing: -0.025em;
 }
 
@@ -256,13 +268,12 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  color: var(--ink-soft);
-  background: #f2f4f0;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 0.76rem;
-  font-weight: 700;
+  padding: 0;
+  color: #c3cec7;
+  background: transparent;
+  border: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
 }
 
 .connection-pill span {
@@ -274,6 +285,34 @@ button {
 
 .product-reset {
   flex: 0 0 auto;
+  min-height: 36px;
+  padding: 7px 12px;
+  color: #d5dfd9;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9px;
+  font-size: 0.72rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.product-reset:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.concept-note {
+  display: flex;
+  gap: 14px;
+  margin-top: 38px;
+  padding: 15px clamp(20px, 4vw, 58px);
+  color: #9eaaa3;
+  background: #10231c;
+  border-radius: 0 0 24px 24px;
+  font-size: 0.66rem;
+}
+
+.concept-note strong {
+  color: #78d7a8;
 }
 
 .demo-alert {
@@ -839,6 +878,14 @@ body.is-embed .demo-shell {
   border: 0;
   border-radius: 0;
   box-shadow: none;
+}
+
+body.is-embed .product-header .library-link {
+  display: none;
+}
+
+body.is-embed .product-header {
+  grid-template-columns: 1fr auto auto;
 }
 
 .experience-tabs {
@@ -2200,7 +2247,7 @@ body.is-embed .demo-shell {
   .site-header,
   .site-footer,
   .demo-wrap {
-    width: min(100% - 20px, 1440px);
+    width: min(100% - 16px, 1500px);
   }
 
   .site-header {
@@ -2229,12 +2276,15 @@ body.is-embed .demo-shell {
   }
 
   .product-header {
-    flex-direction: column;
+    grid-template-columns: 1fr auto;
   }
 
-  .connection-pill,
-  .product-reset {
-    align-self: flex-start;
+  .product-header .library-link {
+    grid-column: 1 / -1;
+  }
+
+  .connection-pill {
+    display: none;
   }
 
   .goal-card__header {
@@ -2276,6 +2326,12 @@ body.is-embed .demo-shell {
   .curation-card__head,
   .curation-statusbar {
     flex-direction: column;
+  }
+
+  .concept-note {
+    flex-direction: column;
+    gap: 4px;
+    border-radius: 0 0 15px 15px;
   }
 
   .policy-version,

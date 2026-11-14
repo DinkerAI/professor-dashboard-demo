@@ -1,6 +1,8 @@
 {
   "name": "Front Range Open — Concept",
   "driver": "players",
+  "divisionFilter": "mixed-doubles",
+  "combineSpread": true,
   "players": 320,
   "targetHours": 16,
   "pricing": {
@@ -23,7 +25,10 @@
     "averageEventsPerPlayer": 1.75,
     "courts": 16,
     "poolGamesPerTeam": 4,
-    "matchMinutes": 25,
+    "poolMatchMinutes": 25,
+    "championshipMatchMinutes": 35,
+    "bronzeMatchMinutes": 40,
+    "goldMatchMinutes": 45,
     "championshipBracket": true,
     "bronzeMatch": true,
     "groups": {

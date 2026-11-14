@@ -23,6 +23,9 @@
     maxLedger: document.getElementById('max-ledger'),
     divisionSpread: document.getElementById('division-spread'),
     runnableDivisions: document.getElementById('runnable-divisions'),
+    divisionFilter: document.getElementById('division-filter'),
+    divisionSummary: document.getElementById('division-summary'),
+    combineSpread: document.getElementById('toggle-combine-spread'),
     registrationMarks: document.getElementById('registration-marks'),
     registrationAverage: document.getElementById('registration-average'),
     gridCapacity: document.getElementById('grid-capacity'),
@@ -74,10 +77,6 @@
       .replaceAll("'", '&#039;');
   }
 
-  function enabledCount(record) {
-    return Math.max(1, Object.values(record || {}).filter(Boolean).length);
-  }
-
   function teamSize() {
     const singles = Boolean(state.grid.formats.singles);
     const doubles = Boolean(state.grid.formats.doubles);
@@ -94,10 +93,10 @@
   function gridMetrics() {
     const grid = state.grid;
     const duprRange = Math.max(0.25, number(grid.duprMax) - number(grid.duprMin));
-    const ageRange = Math.max(1, number(grid.ageMax) - number(grid.ageMin));
+    const ageRange = Math.max(1, number(grid.ageMax) - number(grid.ageMin) + 1);
     const duprBands = Math.max(1, Math.ceil(duprRange / Math.max(0.25, number(grid.duprIncrement, 0.5))));
     const ageBands = Math.max(1, Math.ceil(ageRange / Math.max(1, number(grid.ageIncrement, 10))));
-    const groupFormats = enabledCount(grid.groups) * enabledCount(grid.formats);
+    const groupFormats = divisionProfiles().length;
     return {
       duprBands,
       ageBands,
@@ -117,14 +116,21 @@
       ? Math.max(1, Math.min(metrics.possibleDivisions, Math.floor(teams / minTeams)))
       : 0;
     const teamsPerDivision = activeDivisions
-      ? clamp(teams / activeDivisions, minTeams, maxTeams)
+      ? clamp(teams / activeDivisions, 0, maxTeams)
       : 0;
     const poolGames = activeDivisions * (teamsPerDivision * Math.max(1, number(grid.poolGamesPerTeam, 4)) / 2);
-    const championshipGames = grid.championshipBracket
-      ? activeDivisions * (Math.max(0, Math.min(4, Math.floor(teamsPerDivision)) - 1) + (grid.bronzeMatch ? 1 : 0))
-      : 0;
+    const advancingTeams = Math.min(4, Math.floor(teamsPerDivision));
+    const semifinalGames = grid.championshipBracket && advancingTeams >= 4 ? activeDivisions * 2 : 0;
+    const goldGames = grid.championshipBracket && advancingTeams >= 2 ? activeDivisions : 0;
+    const bronzeGames = grid.championshipBracket && grid.bronzeMatch && advancingTeams >= 4 ? activeDivisions : 0;
+    const championshipGames = semifinalGames + goldGames + bronzeGames;
     const games = Math.max(0, Math.round(poolGames + championshipGames));
-    const hours = games * Math.max(5, number(grid.matchMinutes, 25)) / Math.max(1, number(grid.courts, 1)) / 60;
+    const totalMinutes =
+      poolGames * Math.max(5, number(grid.poolMatchMinutes, 25)) +
+      semifinalGames * Math.max(5, number(grid.championshipMatchMinutes, 35)) +
+      bronzeGames * Math.max(5, number(grid.bronzeMatchMinutes, 40)) +
+      goldGames * Math.max(5, number(grid.goldMatchMinutes, 45));
+    const hours = totalMinutes / Math.max(1, number(grid.courts, 1)) / 60;
     const medalPlacements = activeDivisions * 3 * teamSize();
     const medals = Math.max(0, Math.round(medalPlacements));
     const volunteers = Math.max(1, Math.round(
@@ -137,6 +143,8 @@
       teamsPerDivision: round(teamsPerDivision, 1),
       medals,
       games,
+      poolGames: Math.round(poolGames),
+      championshipGames: Math.round(championshipGames),
       hours: round(hours, 1),
       volunteers,
       courts: Math.max(1, Math.round(number(grid.courts, 1)))
@@ -217,14 +225,14 @@
 
   function solvePlayersForHours(targetHours) {
     const target = Math.max(1, number(targetHours, 1));
-    let low = 20;
+    let low = 1;
     let high = 2000;
     for (let index = 0; index < 28; index += 1) {
       const middle = (low + high) / 2;
       if (calculateOperations(middle).hours < target) low = middle;
       else high = middle;
     }
-    return Math.max(20, Math.round((low + high) / 20) * 10);
+    return Math.max(1, Math.round((low + high) / 2));
   }
 
   function calculationModeOptions(selected) {
@@ -302,40 +310,203 @@
     `;
   }
 
-  function divisionSpread(result) {
-    const metrics = gridMetrics();
-    const count = Math.min(18, Math.max(6, metrics.duprBands * 3));
-    const labels = [];
-    for (let index = 0; index < count; index += 1) {
-      const band = index % metrics.duprBands;
-      const low = number(state.grid.duprMin) + band * number(state.grid.duprIncrement, 0.5);
-      const ageBand = index % metrics.ageBands;
-      const ageStart = number(state.grid.ageMin) + ageBand * number(state.grid.ageIncrement, 10);
-      const weight = 0.68 + 0.32 * Math.sin((index + 1) * 1.7) ** 2;
-      const teams = round(clamp(result.teamsPerDivision * weight, 0, number(state.grid.maxTeams, 12)), 1);
-      labels.push({
-        id: index,
-        label: `${formatNumber(low, 1)} · ${ageStart}+`,
-        teams,
-        runnable: teams >= number(state.grid.minTeams, 4)
-      });
+  function divisionProfiles() {
+    const profiles = [];
+    const groups = state.grid.groups;
+    const formats = state.grid.formats;
+    if (formats.doubles) {
+      if (groups.mens) profiles.push({ key: 'mens-doubles', label: 'Men’s Doubles', short: 'MD', type: 'doubles', weight: 0.98 });
+      if (groups.womens) profiles.push({ key: 'womens-doubles', label: 'Women’s Doubles', short: 'WD', type: 'doubles', weight: 0.94 });
+      if (groups.mixed) profiles.push({ key: 'mixed-doubles', label: 'Mixed Doubles', short: 'MX', type: 'doubles', weight: 1.08 });
     }
-    return labels;
+    if (formats.singles) {
+      if (groups.mens) profiles.push({ key: 'mens-singles', label: 'Men’s Singles', short: 'MS', type: 'singles', weight: 0.64 });
+      if (groups.womens) profiles.push({ key: 'womens-singles', label: 'Women’s Singles', short: 'WS', type: 'singles', weight: 0.6 });
+      if (groups.mixed) profiles.push({ key: 'open-singles', label: 'Open Singles', short: 'OS', type: 'singles', weight: 0.54 });
+    }
+    return profiles.length ? profiles : [{ key: 'open', label: 'Open', short: 'OP', type: 'doubles', weight: 1 }];
+  }
+
+  function projectedDivisionSpread(result) {
+    const grid = state.grid;
+    const metrics = gridMetrics();
+    const profiles = divisionProfiles();
+    const capacity = Math.max(2, number(grid.maxTeams, 12));
+    const floor = Math.max(2, number(grid.minTeams, 4));
+    const inventory = [];
+
+    profiles.forEach(profile => {
+      for (let duprIndex = 0; duprIndex < metrics.duprBands; duprIndex += 1) {
+        const duprMin = number(grid.duprMin) + duprIndex * number(grid.duprIncrement, 0.5);
+        const duprMax = Math.min(number(grid.duprMax), duprMin + number(grid.duprIncrement, 0.5));
+        const duprCenter = (duprMin + duprMax) / 2;
+        for (let ageIndex = 0; ageIndex < metrics.ageBands; ageIndex += 1) {
+          const ageMin = number(grid.ageMin) + ageIndex * number(grid.ageIncrement, 10);
+          const ageMax = Math.min(number(grid.ageMax), ageMin + number(grid.ageIncrement, 10) - 1);
+          const ageCenter = (ageMin + ageMax) / 2;
+          const duprWeight = 0.58 + 0.72 * Math.exp(-1 * (((duprCenter - 3.45) / 0.9) ** 2));
+          const ageWeight = 0.52 + 0.78 * Math.exp(-1 * (((ageCenter - 43) / 24) ** 2));
+          inventory.push({
+            id: `${profile.key}-${duprIndex}-${ageIndex}`,
+            profile,
+            duprMin,
+            duprMax,
+            duprLabel: `${formatNumber(duprMin, 1)}–${formatNumber(duprMax, 1)}`,
+            ageMin,
+            ageMax,
+            ageCenter,
+            ageLabel: `${ageMin}–${ageMax}`,
+            capacity,
+            weight: profile.weight * duprWeight * ageWeight
+          });
+        }
+      }
+    });
+
+    const totalTeams = Math.min(inventory.length * capacity, result.entries / teamSize());
+    const weightTotal = inventory.reduce((sum, item) => sum + item.weight, 0) || 1;
+    inventory.forEach(item => {
+      item.teams = Math.min(capacity, totalTeams * item.weight / weightTotal);
+    });
+    let remainder = totalTeams - inventory.reduce((sum, item) => sum + item.teams, 0);
+    let guard = 0;
+    while (remainder > 0.01 && guard < 12) {
+      const open = inventory.filter(item => item.teams < capacity - 0.01);
+      if (!open.length) break;
+      const openWeight = open.reduce((sum, item) => sum + item.weight, 0) || 1;
+      open.forEach(item => {
+        item.teams += Math.min(capacity - item.teams, remainder * item.weight / openWeight);
+      });
+      remainder = totalTeams - inventory.reduce((sum, item) => sum + item.teams, 0);
+      guard += 1;
+    }
+
+    return inventory.map(item => {
+      const teams = round(item.teams, 1);
+      return {
+        ...item,
+        teams,
+        label: `${item.profile.label} · Age ${item.ageLabel} · DUPR ${item.duprLabel}`,
+        shortLabel: `${item.profile.short} ${item.ageLabel} ${item.duprLabel}`,
+        runnable: teams >= floor,
+        combineCandidate: teams > 0 && teams < floor,
+        combined: false
+      };
+    });
+  }
+
+  function filterDivisionSpread(spread) {
+    const filter = state.divisionFilter || 'all';
+    if (filter === 'all' || filter === 'dupr') return spread;
+    if (filter === 'singles') return spread.filter(item => item.profile.type === 'singles');
+    return spread.filter(item => item.profile.key === filter);
+  }
+
+  function groupItems(items, key) {
+    const groups = new Map();
+    items.forEach(item => {
+      const value = key(item);
+      if (!groups.has(value)) groups.set(value, []);
+      groups.get(value).push(item);
+    });
+    return [...groups.values()];
+  }
+
+  function summarizeDuprSpread(spread) {
+    return groupItems(spread, item => item.duprLabel).map(items => {
+      const source = items[0];
+      const teams = round(items.reduce((sum, item) => sum + item.teams, 0), 1);
+      const capacity = items.reduce((sum, item) => sum + item.capacity, 0);
+      return {
+        ...source,
+        id: `dupr-${source.duprLabel}`,
+        teams,
+        capacity,
+        label: `DUPR ${source.duprLabel} · ${items.length} created divisions`,
+        shortLabel: `DUPR ${source.duprLabel}`,
+        runnable: items.some(item => item.runnable),
+        combineCandidate: items.some(item => item.combineCandidate),
+        combined: false
+      };
+    });
+  }
+
+  function combinedSpreadItem(items, status) {
+    const source = items[0];
+    const teams = round(items.reduce((sum, item) => sum + item.teams, 0), 1);
+    const ageMin = Math.min(...items.map(item => item.ageMin));
+    const ageMax = Math.max(...items.map(item => item.ageMax));
+    const combined = items.length > 1;
+    return {
+      ...source,
+      id: `${source.profile.key}-${source.duprLabel}-${ageMin}-${ageMax}`,
+      teams,
+      capacity: Math.max(source.capacity, teams),
+      ageMin,
+      ageMax,
+      ageLabel: `${ageMin}–${ageMax}`,
+      label: `${source.profile.label} · Age ${ageMin}–${ageMax} · DUPR ${source.duprLabel}`,
+      shortLabel: `${source.profile.short} ${ageMin}–${ageMax} ${source.duprLabel}`,
+      runnable: status !== 'leftover',
+      combineCandidate: status === 'leftover',
+      combined
+    };
+  }
+
+  function combineDivisionSpreadByAge(spread) {
+    const floor = Math.max(2, number(state.grid.minTeams, 4));
+    const output = [];
+    groupItems(spread.filter(item => item.teams > 0), item => `${item.profile.key}|${item.duprLabel}`)
+      .forEach(group => {
+        const sorted = [...group].sort((a, b) => a.ageCenter - b.ageCenter);
+        let pool = [];
+        const flush = status => {
+          if (!pool.length) return;
+          output.push(combinedSpreadItem(pool, status));
+          pool = [];
+        };
+        sorted.forEach(item => {
+          if (item.teams >= floor) {
+            flush('leftover');
+            output.push(combinedSpreadItem([item], 'standalone'));
+            return;
+          }
+          pool.push(item);
+          if (pool.reduce((sum, poolItem) => sum + poolItem.teams, 0) >= floor) flush('combined');
+        });
+        flush('leftover');
+      });
+    return output;
   }
 
   function renderDivisionSpread(result) {
-    const spread = divisionSpread(result);
-    const max = Math.max(1, number(state.grid.maxTeams, 12));
+    const raw = projectedDivisionSpread(result);
+    let spread = filterDivisionSpread(raw);
+    const filter = state.divisionFilter || 'all';
+    if (filter === 'dupr') spread = summarizeDuprSpread(spread);
+    else if (state.combineSpread) spread = combineDivisionSpreadByAge(spread);
+    spread.sort((a, b) => a.duprMin - b.duprMin || a.profile.short.localeCompare(b.profile.short) || a.ageMin - b.ageMin);
+
     const runnable = spread.filter(item => item.runnable).length;
-    elements.runnableDivisions.textContent = formatNumber(result.activeDivisions);
-    elements.divisionSpread.innerHTML = spread.map(item => `
-      <div class="division-bar ${item.runnable ? 'is-runnable' : 'needs-combination'}" title="${escapeHtml(item.label)} · ${formatNumber(item.teams, 1)} teams">
-        <div><span style="height:${Math.max(3, Math.round(item.teams / max * 100))}%"></span></div>
-        <strong>${formatNumber(item.teams, 1)}</strong>
-        <em>${escapeHtml(item.label)}</em>
-      </div>
-    `).join('');
-    elements.divisionSpread.setAttribute('aria-label', `${runnable} of ${spread.length} sampled divisions meet the minimum-team threshold`);
+    const candidates = spread.filter(item => item.combineCandidate).length;
+    const combined = spread.filter(item => item.combined).length;
+    elements.runnableDivisions.textContent = formatNumber(runnable);
+    elements.divisionSummary.textContent = spread.length
+      ? `${formatNumber(spread.length)} projected divisions · ${formatNumber(runnable)} runnable · ${formatNumber(combined)} age-combined · ${formatNumber(candidates)} still need combining`
+      : 'No projected divisions match this view. Enable the related group and format to model it.';
+
+    elements.divisionSpread.innerHTML = spread.length ? spread.map((item, index) => {
+      const height = Math.max(3, Math.round(item.teams / Math.max(1, item.capacity) * 100));
+      const stateClass = item.combined ? 'is-combined' : item.runnable ? 'is-runnable' : 'needs-combination';
+      return `
+        <div class="division-bar ${stateClass}" title="${escapeHtml(item.label)} · ${formatNumber(item.teams, 1)} teams">
+          <div><span style="--bar-height:${height}%;--bar-delay:${Math.min(360, index * 16)}ms"></span></div>
+          <strong>${formatNumber(item.teams, 1)}</strong>
+          <em>${escapeHtml(item.shortLabel)}</em>
+        </div>
+      `;
+    }).join('') : '<div class="division-empty">No divisions in this view.</div>';
+    elements.divisionSpread.setAttribute('aria-label', `${runnable} of ${spread.length} displayed divisions are runnable`);
   }
 
   function syncControls() {
@@ -360,6 +531,9 @@
       input.checked = Boolean(state.grid.formats[input.dataset.format]);
     });
     document.querySelector('[data-pricing="eventFee"]').value = state.pricing.eventFee;
+    elements.divisionFilter.value = state.divisionFilter || 'all';
+    elements.combineSpread.textContent = state.combineSpread ? 'Show raw ages' : 'Combine ages';
+    elements.combineSpread.disabled = state.divisionFilter === 'dupr';
     elements.gridCapacity.textContent = formatNumber(gridMetrics().possibleDivisions);
     elements.driverNote.textContent = state.driver === 'players'
       ? `Runtime is calculated from ${formatNumber(state.players)} max-fill players.`
@@ -368,6 +542,7 @@
 
   function render() {
     if (state.driver === 'hours') state.players = solvePlayersForHours(state.targetHours);
+    else state.targetHours = calculateOperations(state.players).hours;
     syncControls();
     renderRegistrationMarks();
     renderCalculationRows();
@@ -405,6 +580,11 @@
       render();
       return;
     }
+    if (event.target.closest('#toggle-combine-spread')) {
+      state.combineSpread = !state.combineSpread;
+      render();
+      return;
+    }
     const remove = event.target.closest('[data-remove-row]');
     if (remove) {
       state.calculationRows = state.calculationRows.filter(row => row.id !== remove.dataset.removeRow);
@@ -413,16 +593,42 @@
   }
 
   function handleChange(event) {
+    if (event.target.matches('#division-filter')) {
+      state.divisionFilter = event.target.value;
+      render();
+      return;
+    }
     if (event.target.matches('[data-field]')) {
       const field = event.target.dataset.field;
-      state[field] = Math.max(field === 'players' ? 20 : 1, number(event.target.value));
+      state[field] = Math.max(1, number(event.target.value));
       state.driver = field === 'players' ? 'players' : 'hours';
       render();
       return;
     }
     if (event.target.matches('[data-grid]')) {
       const field = event.target.dataset.grid;
-      state.grid[field] = number(event.target.value);
+      const minimums = {
+        courts: 1,
+        poolGamesPerTeam: 1,
+        poolMatchMinutes: 5,
+        championshipMatchMinutes: 5,
+        bronzeMatchMinutes: 5,
+        goldMatchMinutes: 5,
+        duprMin: 2,
+        duprMax: 2.5,
+        duprIncrement: 0.25,
+        ageMin: 8,
+        ageMax: 9,
+        ageIncrement: 1,
+        minTeams: 2,
+        maxTeams: 2,
+        averageEventsPerPlayer: 1
+      };
+      const minimum = minimums[field] ?? 0;
+      state.grid[field] = Math.max(minimum, number(event.target.value, minimum));
+      if (field === 'courts' || field === 'poolGamesPerTeam' || field === 'ageIncrement' || field === 'minTeams' || field === 'maxTeams') {
+        state.grid[field] = Math.round(state.grid[field]);
+      }
       if (field === 'duprMin' && state.grid.duprMin >= state.grid.duprMax) state.grid.duprMax = state.grid.duprMin + 0.5;
       if (field === 'duprMax' && state.grid.duprMax <= state.grid.duprMin) state.grid.duprMin = state.grid.duprMax - 0.5;
       if (field === 'ageMin' && state.grid.ageMin >= state.grid.ageMax) state.grid.ageMax = state.grid.ageMin + 1;

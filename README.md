@@ -50,8 +50,12 @@ classes. This concept cannot create, rename, or delete those records.
 A fictional-data reconstruction of the tournament planning workflow developed
 for Peak Pickleball. It connects the event grid, fill scenarios, court runtime,
 medal ordering, staffing, registration pricing, and editable revenue or expense
-assumptions in one browser-local model. The demo intentionally excludes shared
-team storage, scheduled Court Reserve events, and operational tournament data.
+assumptions in one browser-local model. Players mode holds demand while court and
+match settings recalculate runtime; Hours mode holds runtime while those settings
+recalculate supported players. The division-spread model can be filtered by
+format, summarized by DUPR, or age-combined. The demo intentionally excludes
+shared team storage, scheduled Court Reserve events, and operational tournament
+data.
 
 ## Architecture
 

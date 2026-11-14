@@ -61,8 +61,8 @@
                 <button type="button" data-driver="hours">Hours</button>
               </div>
               <div class="driver-inputs">
-                <label><span>Max-fill players</span><input data-field="players" type="number" min="20" step="10" /></label>
-                <label><span>Target runtime</span><div class="input-unit"><input data-field="targetHours" type="number" min="1" step="1" /><em>hrs</em></div></label>
+                <label><span>Max-fill players</span><input data-field="players" type="number" min="1" step="10" /></label>
+                <label><span>Target runtime</span><div class="input-unit"><input data-field="targetHours" type="number" min="1" step="0.5" /><em>hrs</em></div></label>
               </div>
               <p class="field-note" id="driver-note"></p>
             </section>
@@ -115,7 +115,10 @@
               <div class="field-grid field-grid--two">
                 <label><span>Courts</span><input data-grid="courts" type="number" min="1" step="1" /></label>
                 <label><span>Pool games / team</span><input data-grid="poolGamesPerTeam" type="number" min="1" step="1" /></label>
-                <label><span>Minutes / match</span><input data-grid="matchMinutes" type="number" min="5" step="5" /></label>
+                <label><span>Pool match minutes</span><input data-grid="poolMatchMinutes" type="number" min="5" step="5" /></label>
+                <label><span>Championship minutes</span><input data-grid="championshipMatchMinutes" type="number" min="5" step="5" /></label>
+                <label><span>Bronze match minutes</span><input data-grid="bronzeMatchMinutes" type="number" min="5" step="5" /></label>
+                <label><span>Gold match minutes</span><input data-grid="goldMatchMinutes" type="number" min="5" step="5" /></label>
               </div>
               <div class="toggle-row toggle-row--stack">
                 <label><input data-grid-toggle="championshipBracket" type="checkbox" />Championship bracket</label>
@@ -185,10 +188,31 @@
               <article class="panel result-card">
                 <div class="panel-heading">
                   <div><p class="eyebrow">Capacity model</p><h2>Division spread</h2></div>
+                  <div class="spread-controls">
+                    <label>
+                      <span>Division view</span>
+                      <select id="division-filter">
+                        <option value="all">All divisions</option>
+                        <option value="dupr">DUPR spread</option>
+                        <option value="mixed-doubles">Mixed doubles</option>
+                        <option value="womens-doubles">Women’s doubles</option>
+                        <option value="mens-doubles">Men’s doubles</option>
+                        <option value="singles">Singles</option>
+                      </select>
+                    </label>
+                    <button id="toggle-combine-spread" class="button" type="button">Combine ages</button>
+                  </div>
+                </div>
+                <div class="spread-summary">
+                  <p id="division-summary">Calculating division demand…</p>
                   <strong class="panel-stat"><span id="runnable-divisions">0</span><small>runnable divisions</small></strong>
                 </div>
                 <div id="division-spread" class="division-spread"></div>
-                <p class="field-note">Bars estimate team demand across the configured age and DUPR grid.</p>
+                <div class="spread-legend">
+                  <span><i class="is-runnable"></i>Runnable</span>
+                  <span><i class="needs-combination"></i>Combine candidate</span>
+                  <span><i class="is-combined"></i>Age-combined</span>
+                </div>
               </article>
             </section>
           </section>
