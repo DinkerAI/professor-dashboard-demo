@@ -78,6 +78,19 @@ button {
   max-width: 850px;
 }
 
+.library-link {
+  display: inline-flex;
+  margin-bottom: 48px;
+  color: #c6d2cb;
+  font-size: 0.76rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.library-link:hover {
+  color: #ffffff;
+}
+
 .project-kicker,
 .eyebrow {
   margin: 0 0 10px;
@@ -1288,6 +1301,301 @@ body.is-embed .demo-shell {
   color: var(--blue);
 }
 
+.reward-ladder {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 2fr);
+  gap: 18px;
+  padding: 20px;
+  background: linear-gradient(145deg, #15241e, #111a17);
+  border-radius: 15px;
+  color: var(--white);
+}
+
+.reward-ladder__intro h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  letter-spacing: -0.025em;
+}
+
+.reward-ladder__intro > p:last-child {
+  margin: 7px 0 0;
+  color: #aebeb6;
+  font-size: 0.72rem;
+}
+
+.reward-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.reward-step {
+  padding: 13px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+}
+
+.reward-step.is-unlocked {
+  background: rgba(102, 218, 158, 0.1);
+  border-color: rgba(102, 218, 158, 0.3);
+}
+
+.reward-step__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #91dcb4;
+  font-size: 0.61rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.reward-step h4 {
+  margin: 15px 0 0;
+  font-size: 0.8rem;
+}
+
+.reward-step p {
+  min-height: 34px;
+  margin: 3px 0 0;
+  color: #afbbb5;
+  font-size: 0.66rem;
+}
+
+.reward-step__track {
+  height: 3px;
+  margin-top: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+
+.reward-step__track span {
+  display: block;
+  height: 100%;
+  background: #75d9a5;
+  border-radius: inherit;
+}
+
+.admin-navigation {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.admin-navigation__item {
+  display: grid;
+  gap: 2px;
+  padding: 14px 15px;
+  color: var(--ink-soft);
+  text-align: left;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.admin-navigation__item span {
+  font-size: 0.81rem;
+  font-weight: 850;
+}
+
+.admin-navigation__item small {
+  font-size: 0.66rem;
+}
+
+.admin-navigation__item:hover,
+.admin-navigation__item.is-active {
+  color: var(--ink);
+  background: var(--white);
+  border-color: #69b890;
+}
+
+.tier-selector {
+  margin-top: 14px;
+}
+
+.category-policy-list,
+.roster-list,
+.incentive-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.category-policy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  background: #f7f9f6;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.category-policy-row > div:first-child {
+  display: grid;
+}
+
+.category-policy-row strong {
+  font-size: 0.72rem;
+}
+
+.category-policy-row span {
+  color: var(--ink-soft);
+  font-size: 0.61rem;
+}
+
+.category-policy-row > div:last-child {
+  display: flex;
+  gap: 4px;
+}
+
+.mini-policy-button {
+  padding: 5px 7px;
+  color: var(--ink-soft);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font-size: 0.61rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.mini-policy-button.is-active {
+  color: var(--green-dark);
+  background: var(--green-soft);
+  border-color: #abd9bf;
+}
+
+.mini-policy-button.is-active.is-restricted {
+  color: var(--red);
+  background: var(--red-soft);
+  border-color: #efc5c8;
+}
+
+.administration-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.75fr);
+  gap: 14px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+.count-badge {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  color: var(--green-dark);
+  background: var(--green-soft);
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 850;
+}
+
+.roster-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) minmax(150px, 0.7fr) auto;
+  gap: 11px;
+  align-items: center;
+  padding: 11px;
+  background: #f8faf7;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+
+.roster-avatar {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  color: var(--green-dark);
+  background: var(--green-soft);
+  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.roster-person,
+.roster-row label {
+  display: grid;
+  min-width: 0;
+}
+
+.roster-person strong { font-size: 0.76rem; }
+
+.roster-person span,
+.roster-row label > span {
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.61rem;
+  text-overflow: ellipsis;
+}
+
+.roster-row select,
+.admin-form input,
+.admin-form select,
+.incentive-row input {
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 9px;
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  font: inherit;
+}
+
+.remove-button {
+  padding: 7px 9px;
+  color: var(--red);
+  background: var(--white);
+  border: 1px solid #e7c1c4;
+  border-radius: 8px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 17px;
+}
+
+.admin-form label,
+.incentive-row label {
+  display: grid;
+  gap: 4px;
+  color: var(--ink-soft);
+  font-size: 0.63rem;
+  font-weight: 800;
+}
+
+.admin-form .wide-field,
+.admin-form .primary-button {
+  grid-column: 1 / -1;
+}
+
+.incentive-row {
+  display: grid;
+  grid-template-columns: 78px minmax(130px, 0.7fr) minmax(180px, 1.3fr) auto;
+  gap: 9px;
+  align-items: end;
+  padding: 11px;
+  background: #f8faf7;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+
+.incentive-threshold input {
+  font-weight: 850;
+  text-align: center;
+}
+
 @media (max-width: 920px) {
   .event-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1299,6 +1607,14 @@ body.is-embed .demo-shell {
 
   .curation-sidebar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reward-ladder {
+    grid-template-columns: 1fr;
+  }
+
+  .administration-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1379,8 +1695,37 @@ body.is-embed .demo-shell {
   }
 
   .tier-selector,
-  .curation-sidebar {
+  .curation-sidebar,
+  .admin-navigation,
+  .reward-steps {
     grid-template-columns: 1fr;
+  }
+
+  .roster-row {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .roster-row label,
+  .roster-row .remove-button {
+    grid-column: 1 / -1;
+  }
+
+  .incentive-row {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .incentive-benefit,
+  .incentive-row .remove-button {
+    grid-column: 1 / -1;
+  }
+
+  .admin-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-form label,
+  .admin-form .primary-button {
+    grid-column: 1;
   }
 
   .play-type-row {

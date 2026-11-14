@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const DATA_URL = 'data/demo.json';
+  const DATA_URL = '/data/demo.json';
   const views = [
     ['available', 'Available'],
     ['all', 'All Classes'],
@@ -91,6 +91,11 @@
       .sort((a, b) => a.localeCompare(b));
   }
 
+  function sortedIncentives(policy = state.data.policy) {
+    return [...(policy?.incentives || [])]
+      .sort((a, b) => Number(a.threshold || 0) - Number(b.threshold || 0));
+  }
+
   function resetState() {
     const data = clone(sourceData);
     state = {
@@ -102,6 +107,7 @@
       stagedCoverageId: null,
       policyDraft: clone(data.policy),
       selectedTierId: data.profile.tierId,
+      curationSection: 'access',
       curationSearch: '',
       policyDirty: false
     };
@@ -167,15 +173,18 @@
     const percentage = target > 0
       ? Math.min(100, Math.round((profile.completedPoints / target) * 100))
       : 0;
+    const nextIncentive = sortedIncentives().find(
+      incentive => Number(incentive.threshold) > Number(profile.completedPoints)
+    );
 
     elements.firstName.textContent = firstName;
     elements.profileName.textContent = profile.name;
     elements.profileTier.textContent = tier?.label || 'Instructor';
     elements.progressCount.textContent = formatNumber(profile.completedPoints);
     elements.progressTarget.textContent = formatNumber(target);
-    elements.progressStatus.textContent = profile.completedPoints >= target
-      ? `${tier?.achievement || 'Monthly target'} achieved in this concept month.`
-      : `${formatNumber(target - profile.completedPoints)} points until ${tier?.achievement || 'the monthly target'}.`;
+    elements.progressStatus.textContent = nextIncentive
+      ? `${formatNumber(nextIncentive.threshold - profile.completedPoints)} points until ${nextIncentive.benefit}.`
+      : 'All configured participation rewards are unlocked this month.';
     elements.progressRollover.textContent = `Rollover ${formatNumber(profile.rolloverPoints)}/${formatNumber(rolloverCap)}`;
     elements.progressTrack.setAttribute('aria-valuemax', String(target));
     elements.progressTrack.setAttribute('aria-valuenow', String(profile.completedPoints));
@@ -333,6 +342,40 @@
     `).join('');
   }
 
+  function renderRewardProgress() {
+    const completed = Number(state.data.profile.completedPoints || 0);
+    const incentives = sortedIncentives();
+    if (!incentives.length) return '';
+    return `
+      <section class="reward-ladder collectable" data-collectable aria-labelledby="reward-ladder-title">
+        <div class="reward-ladder__intro">
+          <p class="eyebrow">Participation rewards</p>
+          <h3 id="reward-ladder-title">What the points unlock</h3>
+          <p>Facility-defined member benefits—not wages or payroll compensation.</p>
+        </div>
+        <div class="reward-steps">
+          ${incentives.map((incentive, index) => {
+            const unlocked = completed >= Number(incentive.threshold);
+            const previous = Number(incentives[index - 1]?.threshold || 0);
+            const currentRange = Math.max(1, Number(incentive.threshold) - previous);
+            const progress = Math.max(0, Math.min(100, ((completed - previous) / currentRange) * 100));
+            return `
+              <article class="reward-step ${unlocked ? 'is-unlocked' : ''}">
+                <div class="reward-step__top">
+                  <strong>${formatNumber(incentive.threshold)} points</strong>
+                  <span>${unlocked ? 'Unlocked' : 'In progress'}</span>
+                </div>
+                <h4>${escapeHtml(incentive.name)}</h4>
+                <p>${escapeHtml(incentive.benefit)}</p>
+                <div class="reward-step__track"><span style="width:${unlocked ? 100 : progress}%"></span></div>
+              </article>
+            `;
+          }).join('')}
+        </div>
+      </section>
+    `;
+  }
+
   function renderAvailableView() {
     const myClasses = state.data.myClasses;
     const available = state.data.availableClasses
@@ -341,6 +384,8 @@
       .sort((a, b) => dateForClass(a) - dateForClass(b));
     const restrictedCount = state.data.availableClasses.filter(item => !isAllowed(item.playTypeId)).length;
     return `
+      ${renderRewardProgress()}
+
       <section class="section-block" aria-labelledby="my-classes-title">
         <div class="section-header collectable" data-collectable>
           <div>
@@ -456,6 +501,63 @@
     `;
   }
 
+  function renderAdminNavigation() {
+    const sections = [
+      ['access', 'Access policy', 'Categories, play types, and points'],
+      ['instructors', 'Instructors', 'Add, level, or remove participants'],
+      ['incentives', 'Incentives', 'Define what participation points unlock']
+    ];
+    return `
+      <nav class="admin-navigation" aria-label="Program administration sections">
+        ${sections.map(([id, label, detail]) => `
+          <button
+            type="button"
+            class="admin-navigation__item ${state.curationSection === id ? 'is-active' : ''}"
+            data-action="set-curation-section"
+            data-section="${id}"
+          >
+            <span>${label}</span>
+            <small>${detail}</small>
+          </button>
+        `).join('')}
+      </nav>
+    `;
+  }
+
+  function renderCategoryAccess() {
+    const tier = selectedDraftTier();
+    return `
+      <section class="curation-card category-access" aria-labelledby="category-access-title">
+        <div class="curation-card__head">
+          <div>
+            <p class="eyebrow">Broad controls</p>
+            <h3 id="category-access-title">Category access</h3>
+            <p>Apply one decision to every Court Reserve play type in a category.</p>
+          </div>
+        </div>
+        <div class="category-policy-list">
+          ${policyCategories(state.policyDraft).map(category => {
+            const types = state.policyDraft.playTypes.filter(type => type.category === category);
+            const allowedCount = types.filter(type => tier?.allowedPlayTypeIds?.includes(type.id)).length;
+            const allAllowed = allowedCount === types.length;
+            return `
+              <article class="category-policy-row">
+                <div>
+                  <strong>${escapeHtml(category)}</strong>
+                  <span>${allowedCount}/${types.length} play types allowed</span>
+                </div>
+                <div>
+                  <button type="button" class="mini-policy-button ${allAllowed ? 'is-active' : ''}" data-action="allow-category" data-category="${escapeHtml(category)}">Allow</button>
+                  <button type="button" class="mini-policy-button ${allowedCount === 0 ? 'is-active is-restricted' : ''}" data-action="restrict-category" data-category="${escapeHtml(category)}">Restrict</button>
+                </div>
+              </article>
+            `;
+          }).join('')}
+        </div>
+      </section>
+    `;
+  }
+
   function renderCurationCatalog() {
     const tier = selectedDraftTier();
     const query = state.curationSearch.trim().toLowerCase();
@@ -469,7 +571,7 @@
           <div>
             <p class="eyebrow">Court Reserve source catalog</p>
             <h3 id="catalog-title">Play-type access</h3>
-            <p>Select any imported play type, then allow or restrict it for ${escapeHtml(tier?.label || 'this level')}.</p>
+            <p>Allow or restrict an imported play type for ${escapeHtml(tier?.label || 'this level')}. The catalog remains owned by Court Reserve.</p>
           </div>
           <div class="catalog-actions">
             <button type="button" class="secondary-button" data-action="allow-all">Allow all</button>
@@ -515,8 +617,7 @@
   function renderPolicyEditor() {
     const tier = selectedDraftTier();
     return `
-      <aside class="curation-sidebar">
-        <section class="curation-card policy-editor" aria-labelledby="policy-editor-title">
+      <section class="curation-card policy-editor" aria-labelledby="policy-editor-title">
           <div class="curation-card__head">
             <div>
               <p class="eyebrow">Instructor-level policy</p>
@@ -534,7 +635,7 @@
               <input type="number" min="0" step="0.5" data-tier-setting="rolloverCap" value="${escapeHtml(tier?.rolloverCap ?? 0)}" />
             </label>
             <label class="wide-field">
-              <span>Achievement</span>
+              <span>Level completion note</span>
               <input type="text" data-tier-setting="achievement" value="${escapeHtml(tier?.achievement || '')}" />
             </label>
           </div>
@@ -546,37 +647,132 @@
           <button type="button" class="secondary-button preview-button" data-action="preview-tier">
             Preview instructor workspace as this level
           </button>
-        </section>
+      </section>
+    `;
+  }
 
-        <section class="curation-card add-source-card">
+  function renderAccessAdministration() {
+    return `
+      ${renderTierSelector()}
+      <div class="curation-layout">
+        ${renderCurationCatalog()}
+        <aside class="curation-sidebar">
+          ${renderCategoryAccess()}
+          ${renderPolicyEditor()}
+        </aside>
+      </div>
+      <div class="concept-boundary" role="note">
+        <strong>Court Reserve remains the source</strong>
+        Categories, play types, and scheduled classes are read from Court Reserve. This layer only allows or restricts eligibility and assigns participation-point values; it cannot create, rename, or delete the underlying catalog or classes.
+      </div>
+    `;
+  }
+
+  function renderInstructorAdministration() {
+    const instructors = state.policyDraft.instructors || [];
+    return `
+      <div class="administration-grid">
+        <section class="curation-card roster-card" aria-labelledby="roster-title">
           <div class="curation-card__head">
             <div>
-              <p class="eyebrow">Catalog extension</p>
-              <h3>Add another play type</h3>
-              <p>Simulate importing a new Court Reserve play type into the curation catalog.</p>
+              <p class="eyebrow">Program participants</p>
+              <h3 id="roster-title">Instructor roster</h3>
+              <p>Add instructors to this participation program, set their level, or remove them without changing Court Reserve staff records.</p>
+            </div>
+            <span class="count-badge">${instructors.length} instructors</span>
+          </div>
+          <div class="roster-list">
+            ${instructors.map(instructor => `
+              <article class="roster-row">
+                <div class="roster-avatar">${escapeHtml(instructor.initials)}</div>
+                <div class="roster-person">
+                  <strong>${escapeHtml(instructor.name)}</strong>
+                  <span>${escapeHtml(instructor.email)}</span>
+                </div>
+                <label>
+                  <span>Level</span>
+                  <select data-instructor-tier data-instructor-id="${escapeHtml(instructor.id)}">
+                    ${state.policyDraft.tiers.map(tier => `<option value="${escapeHtml(tier.id)}" ${tier.id === instructor.tierId ? 'selected' : ''}>${escapeHtml(tier.label)}</option>`).join('')}
+                  </select>
+                </label>
+                <button type="button" class="remove-button" data-action="remove-instructor" data-instructor-id="${escapeHtml(instructor.id)}">Remove</button>
+              </article>
+            `).join('') || '<div class="empty-state">No instructors are enrolled in the participation program.</div>'}
+          </div>
+        </section>
+
+        <section class="curation-card add-instructor-card" aria-labelledby="add-instructor-title">
+          <div class="curation-card__head">
+            <div>
+              <p class="eyebrow">Roster access</p>
+              <h3 id="add-instructor-title">Add an instructor</h3>
+              <p>This demo simulates selecting a Court Reserve staff member for the program.</p>
             </div>
           </div>
-          <form id="custom-play-type-form" class="add-source-form">
+          <form id="instructor-form" class="admin-form">
+            <label><span>Full name</span><input name="name" type="text" required placeholder="Taylor Morgan" /></label>
+            <label><span>Email</span><input name="email" type="email" required placeholder="taylor@example.test" /></label>
+            <label><span>Initials</span><input name="initials" type="text" maxlength="3" required placeholder="TM" /></label>
             <label>
-              <span>Play-type name</span>
-              <input type="text" name="name" required placeholder="e.g. Cardio Pickleball" />
+              <span>Starting level</span>
+              <select name="tierId">${state.policyDraft.tiers.map(tier => `<option value="${escapeHtml(tier.id)}">${escapeHtml(tier.label)}</option>`).join('')}</select>
             </label>
-            <label>
-              <span>Category</span>
-              <select name="category">
-                <option>Classes</option>
-                <option>Clinics</option>
-                <option>Open Play</option>
-                <option>Leagues</option>
-                <option>Events</option>
-                <option>Camps</option>
-                <option>Social</option>
-              </select>
-            </label>
-            <button type="submit" class="secondary-button">Add to catalog</button>
+            <button type="submit" class="primary-button">Add to program</button>
           </form>
         </section>
-      </aside>
+      </div>
+      <div class="concept-boundary" role="note">
+        <strong>Participation roster only</strong>
+        Adding or removing someone here controls access to this alternative instructor route. It does not create, delete, hire, or terminate a Court Reserve staff account.
+      </div>
+    `;
+  }
+
+  function renderIncentiveAdministration() {
+    const incentives = sortedIncentives(state.policyDraft);
+    return `
+      <div class="administration-grid administration-grid--rewards">
+        <section class="curation-card incentive-editor" aria-labelledby="incentive-title">
+          <div class="curation-card__head">
+            <div>
+              <p class="eyebrow">Member-benefit ladder</p>
+              <h3 id="incentive-title">Participation incentives</h3>
+              <p>Specify how many points unlock each facility discount or Court Reserve member benefit.</p>
+            </div>
+            <span class="count-badge">${incentives.length} rewards</span>
+          </div>
+          <div class="incentive-list">
+            ${incentives.map(incentive => `
+              <article class="incentive-row">
+                <label class="incentive-threshold"><span>Points</span><input type="number" min="0" step="0.5" value="${escapeHtml(incentive.threshold)}" data-incentive-field="threshold" data-incentive-id="${escapeHtml(incentive.id)}" /></label>
+                <label><span>Reward name</span><input type="text" value="${escapeHtml(incentive.name)}" data-incentive-field="name" data-incentive-id="${escapeHtml(incentive.id)}" /></label>
+                <label class="incentive-benefit"><span>What it unlocks</span><input type="text" value="${escapeHtml(incentive.benefit)}" data-incentive-field="benefit" data-incentive-id="${escapeHtml(incentive.id)}" /></label>
+                <button type="button" class="remove-button" data-action="remove-incentive" data-incentive-id="${escapeHtml(incentive.id)}">Remove</button>
+              </article>
+            `).join('') || '<div class="empty-state">No point incentives are configured.</div>'}
+          </div>
+        </section>
+
+        <section class="curation-card add-incentive-card" aria-labelledby="add-incentive-title">
+          <div class="curation-card__head">
+            <div>
+              <p class="eyebrow">New reward</p>
+              <h3 id="add-incentive-title">Add an incentive</h3>
+              <p>Rewards are benefits and discounts, not compensation for employment.</p>
+            </div>
+          </div>
+          <form id="incentive-form" class="admin-form">
+            <label><span>Reward name</span><input name="name" type="text" required placeholder="Monthly clinic credit" /></label>
+            <label><span>Points required</span><input name="threshold" type="number" min="0" step="0.5" required value="6" /></label>
+            <label class="wide-field"><span>What it unlocks</span><input name="benefit" type="text" required placeholder="One complimentary clinic registration" /></label>
+            <button type="submit" class="primary-button">Add incentive</button>
+          </form>
+        </section>
+      </div>
+      <div class="concept-boundary" role="note">
+        <strong>Not a payroll product</strong>
+        This route is for facilities offering discounts, credits, and member benefits in exchange for voluntary instructor participation. Facilities paying instructors as employees or contractors would use their payroll and Court Reserve operating workflows instead.
+      </div>
     `;
   }
 
@@ -589,30 +785,27 @@
         <div class="curation-hero">
           <div>
             <p class="eyebrow">Facility configuration</p>
-            <h2 id="curation-title">Curation Studio</h2>
-            <p>Map Court Reserve play types to instructor levels, adjust credit, and preview the instructor experience before publishing.</p>
+            <h2 id="curation-title">Program Administration</h2>
+            <p>Curate class eligibility, manage participating instructors, and define the member benefits earned with points.</p>
           </div>
           <div class="policy-version">
             <span>${escapeHtml(state.policyDraft.version)}</span>
             <strong>${state.policyDirty ? 'Unpublished changes' : 'Published policy'}</strong>
           </div>
         </div>
-        ${renderTierSelector()}
+        ${renderAdminNavigation()}
         <div class="curation-statusbar">
-          <span>${accessDelta === 0 ? 'Access matches published policy' : `${accessDelta > 0 ? '+' : ''}${accessDelta} allowed play types versus published`}</span>
+          <span>${state.curationSection === 'access' && accessDelta !== 0 ? `${accessDelta > 0 ? '+' : ''}${accessDelta} allowed play types versus published` : state.policyDirty ? 'Draft changes are ready to publish' : 'Program configuration matches the published concept'}</span>
           <div>
             <button type="button" class="secondary-button" data-action="reset-policy-draft" ${state.policyDirty ? '' : 'disabled'}>Discard draft</button>
             <button type="button" class="primary-button" data-action="publish-policy" ${state.policyDirty ? '' : 'disabled'}>Publish to concept</button>
           </div>
         </div>
-        <div class="curation-layout">
-          ${renderCurationCatalog()}
-          ${renderPolicyEditor()}
-        </div>
-        <div class="concept-boundary" role="note">
-          <strong>Concept boundary</strong>
-          In a Court Reserve integration, the catalog would be read from the facility’s configured play types. Publishing would save policy in an instructor-program layer; it would not rename or delete the underlying Court Reserve play type.
-        </div>
+        ${state.curationSection === 'instructors'
+          ? renderInstructorAdministration()
+          : state.curationSection === 'incentives'
+            ? renderIncentiveAdministration()
+            : renderAccessAdministration()}
       </section>
     `;
   }
@@ -762,8 +955,33 @@
     render();
   }
 
+  function setCategoryDraftAccess(category, allowed) {
+    const tier = selectedDraftTier();
+    if (!tier) return;
+    const categoryIds = state.policyDraft.playTypes
+      .filter(type => type.category === category)
+      .map(type => type.id);
+    const next = new Set(tier.allowedPlayTypeIds || []);
+    categoryIds.forEach(id => {
+      if (allowed) {
+        next.add(id);
+        if (!(id in tier.pointsByType)) {
+          tier.pointsByType[id] = playTypeById(id, state.policyDraft)?.defaultPoints ?? 1;
+        }
+      } else {
+        next.delete(id);
+      }
+    });
+    tier.allowedPlayTypeIds = Array.from(next);
+    markPolicyDirty();
+    render();
+  }
+
   function publishPolicy() {
     state.data.policy = clone(state.policyDraft);
+    state.data.instructorDirectory = Object.fromEntries(
+      (state.data.policy.instructors || []).map(instructor => [instructor.initials, instructor.name])
+    );
     state.policyDirty = false;
     state.activeFilters = new Set(policyCategories().map(slug));
     render();
@@ -790,29 +1008,70 @@
     window.scrollTo({ top: elements.goalCard.offsetTop, behavior: 'smooth' });
   }
 
-  function addCustomPlayType(form) {
+  function addInstructor(form) {
     const data = new FormData(form);
     const name = String(data.get('name') || '').trim();
-    const category = String(data.get('category') || 'Classes').trim();
-    if (!name) return;
+    const email = String(data.get('email') || '').trim();
+    let initials = String(data.get('initials') || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 3);
+    const tierId = String(data.get('tierId') || state.policyDraft.tiers[0]?.id || '');
+    if (!name || !email || !initials) return;
     let id = slug(name);
-    if (!id) id = `play-type-${Date.now()}`;
-    while (state.policyDraft.playTypes.some(type => type.id === id)) id = `${id}-custom`;
-    state.policyDraft.playTypes.push({
+    if (!id) id = `instructor-${Date.now()}`;
+    while ((state.policyDraft.instructors || []).some(instructor => instructor.id === id)) id = `${id}-2`;
+    while ((state.policyDraft.instructors || []).some(instructor => instructor.initials === initials)) {
+      initials = `${initials.slice(0, 2)}${Math.floor(Math.random() * 9) + 1}`;
+    }
+    if (!state.policyDraft.instructors) state.policyDraft.instructors = [];
+    state.policyDraft.instructors.push({
       id,
+      initials,
       name,
-      category,
-      source: 'Court Reserve play type',
-      futureEvents: 0,
-      staffing: 'Configure staffing',
-      defaultPoints: 1
+      email,
+      tierId,
+      status: 'Active'
     });
-    const tier = selectedDraftTier();
-    tier.allowedPlayTypeIds.push(id);
-    tier.pointsByType[id] = 1;
     markPolicyDirty();
     render();
-    showAlert(`${name} added to the draft catalog and allowed for ${tier.label}.`);
+    showAlert(`${name} added to the draft participation roster.`);
+  }
+
+  function removeInstructor(id) {
+    const instructor = (state.policyDraft.instructors || []).find(item => item.id === id);
+    if (!instructor) return;
+    state.policyDraft.instructors = state.policyDraft.instructors.filter(item => item.id !== id);
+    markPolicyDirty();
+    render();
+    showAlert(`${instructor.name} removed from the draft participation roster.`);
+  }
+
+  function addIncentive(form) {
+    const data = new FormData(form);
+    const name = String(data.get('name') || '').trim();
+    const benefit = String(data.get('benefit') || '').trim();
+    const threshold = Math.max(0, Number(data.get('threshold') || 0));
+    if (!name || !benefit) return;
+    let id = slug(name) || `incentive-${Date.now()}`;
+    while ((state.policyDraft.incentives || []).some(item => item.id === id)) id = `${id}-2`;
+    if (!state.policyDraft.incentives) state.policyDraft.incentives = [];
+    state.policyDraft.incentives.push({
+      id,
+      name,
+      threshold,
+      benefit,
+      description: 'Facility-defined participation benefit.'
+    });
+    markPolicyDirty();
+    render();
+    showAlert(`${name} added to the draft incentive ladder.`);
+  }
+
+  function removeIncentive(id) {
+    const incentive = (state.policyDraft.incentives || []).find(item => item.id === id);
+    if (!incentive) return;
+    state.policyDraft.incentives = state.policyDraft.incentives.filter(item => item.id !== id);
+    markPolicyDirty();
+    render();
+    showAlert(`${incentive.name} removed from the draft incentive ladder.`);
   }
 
   function handleClick(event) {
@@ -825,7 +1084,7 @@
     }
     const actionTarget = event.target.closest('[data-action]');
     if (!actionTarget) return;
-    const { action, view, filter, classId, tierId, playTypeId } = actionTarget.dataset;
+    const { action, view, filter, classId, tierId, playTypeId, section, category, instructorId, incentiveId } = actionTarget.dataset;
     if (action === 'set-view') setView(view);
     if (action === 'toggle-filter') toggleFilter(filter);
     if (action === 'toggle-class') toggleClass(classId);
@@ -837,6 +1096,14 @@
     if (action === 'toggle-play-type') toggleDraftPlayType(playTypeId);
     if (action === 'allow-all') setAllDraftPlayTypes(true);
     if (action === 'restrict-all') setAllDraftPlayTypes(false);
+    if (action === 'allow-category') setCategoryDraftAccess(category, true);
+    if (action === 'restrict-category') setCategoryDraftAccess(category, false);
+    if (action === 'set-curation-section') {
+      state.curationSection = section;
+      render();
+    }
+    if (action === 'remove-instructor') removeInstructor(instructorId);
+    if (action === 'remove-incentive') removeIncentive(incentiveId);
     if (action === 'publish-policy') publishPolicy();
     if (action === 'reset-policy-draft') resetPolicyDraft();
     if (action === 'preview-tier') previewSelectedTier();
@@ -854,6 +1121,29 @@
     if (event.target.matches('[data-tier-setting]')) {
       const field = event.target.dataset.tierSetting;
       tier[field] = event.target.type === 'number'
+        ? Math.max(0, Number(event.target.value || 0))
+        : event.target.value;
+      markPolicyDirty();
+      render();
+      return;
+    }
+    if (event.target.matches('[data-instructor-tier]')) {
+      const instructor = (state.policyDraft.instructors || []).find(
+        item => item.id === event.target.dataset.instructorId
+      );
+      if (!instructor) return;
+      instructor.tierId = event.target.value;
+      markPolicyDirty();
+      render();
+      return;
+    }
+    if (event.target.matches('[data-incentive-field]')) {
+      const incentive = (state.policyDraft.incentives || []).find(
+        item => item.id === event.target.dataset.incentiveId
+      );
+      if (!incentive) return;
+      const field = event.target.dataset.incentiveField;
+      incentive[field] = event.target.type === 'number'
         ? Math.max(0, Number(event.target.value || 0))
         : event.target.value;
       markPolicyDirty();
@@ -973,9 +1263,14 @@
     next?.setSelectionRange(selectionStart, selectionStart);
   });
   elements.view.addEventListener('submit', event => {
-    if (event.target.id !== 'custom-play-type-form') return;
-    event.preventDefault();
-    addCustomPlayType(event.target);
+    if (event.target.id === 'instructor-form') {
+      event.preventDefault();
+      addInstructor(event.target);
+    }
+    if (event.target.id === 'incentive-form') {
+      event.preventDefault();
+      addIncentive(event.target);
+    }
   });
   elements.primaryAction.addEventListener('click', commitPrimaryAction);
   elements.reset.addEventListener('click', () => {

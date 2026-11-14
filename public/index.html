@@ -5,136 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="An interactive concept for a Court Reserve instructor scheduling and program-curation workspace."
+      content="A growing library of interactive product demos by Cord Wilson and Forward Canon."
     />
-    <meta name="deployment-source" content="cloudflare-workers-builds:github-main" />
-    <meta name="color-scheme" content="light" />
-    <title>Court Reserve Instructor Dashboard — Product Concept</title>
-    <link rel="stylesheet" href="assets/demo.css" />
-    <script src="assets/demo.js" defer></script>
+    <meta name="color-scheme" content="dark" />
+    <title>Forward Canon Demo Library</title>
+    <link rel="stylesheet" href="/assets/hub.css" />
   </head>
   <body>
-    <a class="skip-link" href="#demo-app">Skip to demo</a>
-
-    <header class="site-header" data-standalone-only>
-      <div class="site-header__inner">
-        <div class="project-kicker">Court Reserve · Instructor operations concept</div>
-        <h1>Instructor scheduling and program curation, together.</h1>
-        <p>
-          A working product concept for selecting teaching assignments, managing coverage,
-          and curating which Court Reserve play types each instructor level can access.
+    <main class="hub-shell">
+      <header class="hub-hero">
+        <a class="hub-wordmark" href="https://forwardcanon.com/">FORWARD CANON</a>
+        <p class="hub-kicker">Working product concepts</p>
+        <h1>Demos you can actually use.</h1>
+        <p class="hub-intro">
+          A growing collection of browser-based prototypes, reconstructed workflows,
+          and product ideas. Each demo opens directly—no install, account, or setup.
         </p>
-        <div class="project-facts" aria-label="Demo facts">
-          <span>Fictional people and classes</span>
-          <span>No sign-in required</span>
-          <span>No external services</span>
-          <a
-            class="source-link"
-            href="https://github.com/DinkerAI/professor-dashboard-demo"
-            target="_blank"
-            rel="noreferrer"
-          >View source on GitHub <span aria-hidden="true">↗</span></a>
-        </div>
-      </div>
-    </header>
+        <div class="hub-count"><strong>01</strong><span>live concept</span></div>
+      </header>
 
-    <main id="demo-app" class="demo-wrap">
-      <section class="demo-shell" aria-labelledby="dashboard-title">
-        <div class="demo-disclosure" role="note">
-          <span class="demo-disclosure__signal" aria-hidden="true"></span>
-          <p>
-            <strong>Interactive product concept</strong>
-            Fictional data · No live Court Reserve connection
-          </p>
-          <button id="reset-demo" class="text-button" type="button">Reset demo</button>
+      <section class="demo-library" aria-labelledby="library-title">
+        <div class="library-heading">
+          <div>
+            <p class="hub-kicker">The library</p>
+            <h2 id="library-title">Choose a demo.</h2>
+          </div>
+          <p>New concepts can be added here without changing their direct links.</p>
         </div>
 
-        <header class="product-header">
-          <div class="brand-lockup">
-            <div class="brand-monogram" aria-hidden="true">CR</div>
-            <div>
-              <div class="brand-name">COURT RESERVE CONCEPT</div>
-              <h2 id="dashboard-title">Instructor Dashboard</h2>
+        <div class="demo-grid">
+          <a class="demo-card demo-card--live" href="/court-reserve-instructor-dashboard/">
+            <div class="demo-card__topline">
+              <span>Operations · Incentives</span>
+              <span class="live-pill">Interactive</span>
             </div>
-          </div>
-          <div class="connection-pill" aria-label="Demo connection status">
-            <span aria-hidden="true"></span>
-            Concept mode · local state
-          </div>
-        </header>
-
-        <nav id="experience-tabs" class="experience-tabs" aria-label="Dashboard experience">
-          <button type="button" class="experience-tab is-active" data-mode="instructor">
-            <span>Instructor workspace</span>
-            <small>Schedule, coverage, and history</small>
-          </button>
-          <button type="button" class="experience-tab" data-mode="curation">
-            <span>Curation studio</span>
-            <small>Play types, access, and points</small>
-          </button>
-        </nav>
-
-        <div id="demo-alert" class="demo-alert" aria-live="polite" aria-atomic="true"></div>
-
-        <section class="goal-card" aria-labelledby="progress-title">
-          <div class="goal-card__header">
-            <div>
-              <p class="eyebrow">Monthly instruction progress</p>
-              <h3 id="progress-title">Welcome back, <span id="profile-first-name">Professor</span>.</h3>
-              <div class="user-line">
-                <span id="profile-name">Demo Instructor</span>
-                <span aria-hidden="true">·</span>
-                <span id="profile-tier" class="tier-badge">Instructor</span>
-              </div>
+            <div class="demo-card__mark" aria-hidden="true">CR</div>
+            <div class="demo-card__body">
+              <h3>Court Reserve Instructor Dashboard</h3>
+              <p>
+                An alternative, self-managed instructor route built around class eligibility,
+                coverage, participation points, and facility discounts—not payroll.
+              </p>
+              <ul aria-label="Included experiences">
+                <li>Instructor workspace</li>
+                <li>Program administration</li>
+                <li>Reward configuration</li>
+              </ul>
             </div>
-            <div class="goal-number" aria-label="Monthly progress">
-              <strong id="progress-count">0</strong>
-              <span>/ <span id="progress-target">0</span> points</span>
+            <div class="demo-card__action">Open the demo <span aria-hidden="true">↗</span></div>
+          </a>
+
+          <article class="demo-card demo-card--reserved" aria-label="Future demo slot">
+            <div class="demo-card__topline"><span>Next concept</span></div>
+            <div class="reserved-number">02</div>
+            <div class="demo-card__body">
+              <h3>Reserved for the next build.</h3>
+              <p>The library is ready to grow without turning each prototype into a separate domain.</p>
             </div>
-          </div>
+          </article>
 
-          <div
-            class="progress-track"
-            role="progressbar"
-            aria-valuemin="0"
-            aria-valuemax="5"
-            aria-valuenow="0"
-            aria-label="Monthly teaching points"
-          >
-            <span id="progress-fill"></span>
-          </div>
-
-          <div class="goal-card__footer">
-            <span id="progress-status">Loading progress…</span>
-            <span id="progress-rollover">Rollover 0/0</span>
-            <details class="rules-popover">
-              <summary>Program rules</summary>
-              <ul id="rules-list"></ul>
-            </details>
-          </div>
-        </section>
-
-        <div class="action-row">
-          <nav id="view-tabs" class="view-tabs" aria-label="Class views"></nav>
-          <button id="primary-action" class="primary-button" type="button" disabled>
-            Confirm selected
-          </button>
+          <article class="demo-card demo-card--reserved" aria-label="Future demo slot">
+            <div class="demo-card__topline"><span>Future concept</span></div>
+            <div class="reserved-number">03</div>
+            <div class="demo-card__body">
+              <h3>Another idea can live here.</h3>
+              <p>Every published concept gets a stable direct route and a place in this index.</p>
+            </div>
+          </article>
         </div>
-
-        <section id="dashboard-view" class="dashboard-view" aria-live="polite"></section>
       </section>
     </main>
 
-    <footer class="site-footer" data-standalone-only>
-      <p>
-        Independent product concept for presentation purposes. It does not authenticate users,
-        store personal information, modify Court Reserve, or imply endorsement by Court Reserve.
-      </p>
-      <a
-        href="https://github.com/DinkerAI/professor-dashboard-demo"
-        target="_blank"
-        rel="noreferrer"
-      >Source code and technical notes on GitHub <span aria-hidden="true">↗</span></a>
+    <footer class="hub-footer">
+      <span>Forward Canon · Interactive product work</span>
+      <a href="https://forwardcanon.com/more-about-cord">Back to the portfolio <span aria-hidden="true">→</span></a>
     </footer>
   </body>
 </html>

@@ -4,6 +4,8 @@ import { resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '..');
 const requiredFiles = [
   'public/index.html',
+  'public/court-reserve-instructor-dashboard/index.html',
+  'public/assets/hub.css',
   'public/assets/demo.css',
   'public/assets/demo.js',
   'public/data/demo.json',
@@ -14,8 +16,9 @@ const requiredFiles = [
 
 await Promise.all(requiredFiles.map(file => access(resolve(root, file))));
 
-const [html, browserJs, workerJs, rawData, rawWrangler] = await Promise.all([
+const [hubHtml, demoHtml, browserJs, workerJs, rawData, rawWrangler] = await Promise.all([
   readFile(resolve(root, 'public/index.html'), 'utf8'),
+  readFile(resolve(root, 'public/court-reserve-instructor-dashboard/index.html'), 'utf8'),
   readFile(resolve(root, 'public/assets/demo.js'), 'utf8'),
   readFile(resolve(root, 'src/index.js'), 'utf8'),
   readFile(resolve(root, 'public/data/demo.json'), 'utf8'),
@@ -25,16 +28,55 @@ const [html, browserJs, workerJs, rawData, rawWrangler] = await Promise.all([
 JSON.parse(rawData);
 JSON.parse(rawWrangler);
 
-const requiredHtmlMarkers = [
+const requiredHubMarkers = [
+  'Forward Canon Demo Library',
+  '/court-reserve-instructor-dashboard/',
+  'Demos you can actually use.'
+];
+
+const requiredDemoMarkers = [
   'Court Reserve Instructor Dashboard',
   'Interactive product concept',
-  'Curation studio',
+  'Program administration',
   'No live Court Reserve connection',
   'https://github.com/DinkerAI/professor-dashboard-demo'
 ];
 
-for (const marker of requiredHtmlMarkers) {
-  if (!html.includes(marker)) throw new Error(`Missing required HTML marker: ${marker}`);
+for (const marker of requiredHubMarkers) {
+  if (!hubHtml.includes(marker)) throw new Error(`Missing required hub marker: ${marker}`);
+}
+
+for (const marker of requiredDemoMarkers) {
+  if (!demoHtml.includes(marker)) throw new Error(`Missing required demo marker: ${marker}`);
+}
+
+const data = JSON.parse(rawData);
+if (!Array.isArray(data.policy?.instructors) || data.policy.instructors.length < 1) {
+  throw new Error('The fictional instructor roster is missing.');
+}
+if (!Array.isArray(data.policy?.incentives) || data.policy.incentives.length < 1) {
+  throw new Error('The fictional incentive ladder is missing.');
+}
+const playTypeIds = new Set(data.policy.playTypes.map(type => type.id));
+const tierIds = new Set(data.policy.tiers.map(tier => tier.id));
+for (const tier of data.policy.tiers) {
+  for (const id of tier.allowedPlayTypeIds) {
+    if (!playTypeIds.has(id)) throw new Error(`Unknown play type ${id} in ${tier.id}.`);
+  }
+}
+for (const instructor of data.policy.instructors) {
+  if (!tierIds.has(instructor.tierId)) throw new Error(`Unknown tier for ${instructor.id}.`);
+}
+for (const incentive of data.policy.incentives) {
+  if (!incentive.name || !incentive.benefit || Number(incentive.threshold) < 0) {
+    throw new Error(`Invalid incentive ${incentive.id}.`);
+  }
+}
+if (!browserJs.includes('setCategoryDraftAccess') || !browserJs.includes('renderIncentiveAdministration')) {
+  throw new Error('Program administration behaviors are missing.');
+}
+if (!workerJs.includes('demo.forwardcanon.com')) {
+  throw new Error('The demo library custom domain is missing from the Worker.');
 }
 
 const prohibitedRuntimeMarkers = [

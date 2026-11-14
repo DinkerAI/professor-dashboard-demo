@@ -1,56 +1,47 @@
-# Portfolio and Cloudflare handoff
+# Demo library and portfolio handoff
 
-## Links
+## Public links
 
-- Live concept: `https://professor.forwardcanon.com/`
+- Library: `https://demo.forwardcanon.com/`
+- Direct demo: `https://demo.forwardcanon.com/court-reserve-instructor-dashboard/`
 - GitHub: `https://github.com/DinkerAI/professor-dashboard-demo`
 - Cloudflare fallback: `https://professor-dashboard-demo.cordwilson.workers.dev/`
 
-The repository is a self-contained Cloudflare Worker with static assets in
-`public/`. It contains no credentials or live operational data. GitHub `main`
-is connected to Cloudflare Workers Builds and deploys automatically.
-
-The public title is **Court Reserve Instructor Dashboard**. The historical
-repository and Worker slug stay `professor-dashboard-demo` so the current build
-connection, URLs, and deployment history remain stable.
+`professor.forwardcanon.com` is retained as a redirect so an existing portfolio
+link does not break. New links should use the direct demo route above.
 
 ## Portfolio integration
 
-Use the custom domain for a normal link. To embed the experience, use:
+Link directly to the demo, or embed it with:
 
 ```html
 <iframe
-  src="https://professor.forwardcanon.com/?embed=1"
+  src="https://demo.forwardcanon.com/court-reserve-instructor-dashboard/?embed=1"
   title="Interactive Court Reserve Instructor Dashboard concept"
   loading="lazy"
   style="width:100%;min-height:1000px;border:0"
 ></iframe>
 ```
 
-The deployed `_headers` policy permits framing from `forwardcanon.com` and
-`www.forwardcanon.com`. Keep an “Open full concept” link for mobile visitors.
-
-## What to feature
-
-- **Instructor workspace:** class selection, urgent coverage, monthly progress,
-  history, policy filtering, instructor-name reveal, and scroll collection.
-- **Curation Studio:** level selection, searchable play types, allow/restrict
-  controls, points, targets, draft publishing, and instructor preview.
-
-## Public-safety constraints
-
-- Keep the visible fictional-data and no-live-connection disclosure.
-- Do not replace fictional data with real instructor or class information.
-- Do not put Court Reserve credentials or secrets in browser code or Git.
-- Keep external integrations behind server-side Worker routes.
-- Preserve the independent-concept / no-endorsement statement.
-- Run `npm run check` before merging a deployment change.
+Keep an “Open full demo” link for mobile visitors and users who prefer a
+separate page.
 
 ## Suggested portfolio copy
 
 **Explore the Court Reserve Instructor Dashboard concept**
 
-See the instructor and program-operations sides of one workflow: select classes,
-manage coverage, curate play-type access by instructor level, and preview the
-result. Everything uses fictional data and runs safely in the browser.
+An alternative instructor route for facilities that reward participation with
+Court Reserve discounts, credits, and member benefits rather than payroll.
+Instructors manage eligible classes and coverage; administrators curate access
+by category, play type, and level, manage the roster, and define what each point
+threshold unlocks.
+
+## Public-safety constraints
+
+- Keep the fictional-data and no-live-connection disclosure.
+- Do not use real instructor or class information.
+- Do not put Court Reserve credentials or secrets in browser code or Git.
+- Court Reserve remains the source of categories, play types, and classes.
+- Keep the independent-concept / no-endorsement statement.
+- Run `npm run check` before deployment.
 

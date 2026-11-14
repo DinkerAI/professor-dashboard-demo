@@ -2,7 +2,7 @@
   "name": "professor-dashboard-demo",
   "version": "1.0.0",
   "private": true,
-  "description": "Interactive Court Reserve Instructor Dashboard concept with fictional scheduling and curation workflows.",
+  "description": "Forward Canon demo library with an interactive Court Reserve Instructor Dashboard concept.",
   "type": "module",
   "engines": {
     "node": ">=22.12.0"

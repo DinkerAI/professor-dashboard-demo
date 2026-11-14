@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="An interactive concept for Court Reserve instructor scheduling, eligibility, and member-credit incentives."
+    />
+    <meta name="deployment-source" content="cloudflare-workers-builds:github-main" />
+    <meta name="color-scheme" content="light" />
+    <title>Court Reserve Instructor Dashboard — Product Concept</title>
+    <link rel="stylesheet" href="/assets/demo.css" />
+    <script src="/assets/demo.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#demo-app">Skip to demo</a>
+
+    <header class="site-header" data-standalone-only>
+      <div class="site-header__inner">
+        <a class="library-link" href="/">← Demo library</a>
+        <div class="project-kicker">Court Reserve · Instructor participation concept</div>
+        <h1>Instructor scheduling and member incentives, together.</h1>
+        <p>
+          A self-managed instructor route for facilities that reward participation with
+          Court Reserve discounts and member benefits rather than payroll compensation.
+        </p>
+        <div class="project-facts" aria-label="Demo facts">
+          <span>Fictional people and classes</span>
+          <span>No sign-in required</span>
+          <span>No payroll workflow</span>
+          <a
+            class="source-link"
+            href="https://github.com/DinkerAI/professor-dashboard-demo"
+            target="_blank"
+            rel="noreferrer"
+          >View source on GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </header>
+
+    <main id="demo-app" class="demo-wrap">
+      <section class="demo-shell" aria-labelledby="dashboard-title">
+        <div class="demo-disclosure" role="note">
+          <span class="demo-disclosure__signal" aria-hidden="true"></span>
+          <p>
+            <strong>Interactive product concept</strong>
+            Fictional data · No live Court Reserve connection
+          </p>
+          <button id="reset-demo" class="text-button" type="button">Reset demo</button>
+        </div>
+
+        <header class="product-header">
+          <div class="brand-lockup">
+            <div class="brand-monogram" aria-hidden="true">CR</div>
+            <div>
+              <div class="brand-name">COURT RESERVE CONCEPT</div>
+              <h2 id="dashboard-title">Instructor Dashboard</h2>
+            </div>
+          </div>
+          <div class="connection-pill" aria-label="Demo connection status">
+            <span aria-hidden="true"></span>
+            Concept mode · local state
+          </div>
+        </header>
+
+        <nav id="experience-tabs" class="experience-tabs" aria-label="Dashboard experience">
+          <button type="button" class="experience-tab is-active" data-mode="instructor">
+            <span>Instructor workspace</span>
+            <small>Schedule, coverage, rewards, and history</small>
+          </button>
+          <button type="button" class="experience-tab" data-mode="curation">
+            <span>Program administration</span>
+            <small>Access, instructors, points, and incentives</small>
+          </button>
+        </nav>
+
+        <div id="demo-alert" class="demo-alert" aria-live="polite" aria-atomic="true"></div>
+
+        <section class="goal-card" aria-labelledby="progress-title">
+          <div class="goal-card__header">
+            <div>
+              <p class="eyebrow">Monthly participation progress</p>
+              <h3 id="progress-title">Welcome back, <span id="profile-first-name">Instructor</span>.</h3>
+              <div class="user-line">
+                <span id="profile-name">Demo Instructor</span>
+                <span aria-hidden="true">·</span>
+                <span id="profile-tier" class="tier-badge">Instructor</span>
+              </div>
+            </div>
+            <div class="goal-number" aria-label="Monthly progress">
+              <strong id="progress-count">0</strong>
+              <span>/ <span id="progress-target">0</span> points</span>
+            </div>
+          </div>
+
+          <div
+            class="progress-track"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="5"
+            aria-valuenow="0"
+            aria-label="Monthly participation points"
+          >
+            <span id="progress-fill"></span>
+          </div>
+
+          <div class="goal-card__footer">
+            <span id="progress-status">Loading progress…</span>
+            <span id="progress-rollover">Rollover 0/0</span>
+            <details class="rules-popover">
+              <summary>Program rules</summary>
+              <ul id="rules-list"></ul>
+            </details>
+          </div>
+        </section>
+
+        <div class="action-row">
+          <nav id="view-tabs" class="view-tabs" aria-label="Class views"></nav>
+          <button id="primary-action" class="primary-button" type="button" disabled>
+            Confirm selected
+          </button>
+        </div>
+
+        <section id="dashboard-view" class="dashboard-view" aria-live="polite"></section>
+      </section>
+    </main>
+
+    <footer class="site-footer" data-standalone-only>
+      <p>
+        Independent product concept for presentation purposes. It does not authenticate users,
+        process payroll, store personal information, modify Court Reserve, or imply endorsement.
+      </p>
+      <a href="/">Browse all demos <span aria-hidden="true">→</span></a>
+    </footer>
+  </body>
+</html>
+

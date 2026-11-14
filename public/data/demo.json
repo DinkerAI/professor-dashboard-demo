@@ -14,13 +14,78 @@
   },
   "rules": [
     "Play-type eligibility is curated by instructor level and can be changed without altering the Court Reserve event itself.",
-    "Staffing guidance can scale with registration while the facility retains final assignment authority.",
+    "Participation points unlock facility-defined discounts and member benefits; they are not payroll compensation.",
     "An instructor can request coverage for a class inside the configured change window."
   ],
   "policy": {
     "version": "Concept policy 1.2",
     "coverageWindowDays": 7,
     "maxAdvanceDays": 31,
+    "instructors": [
+      {
+        "id": "maya-torres",
+        "initials": "MT",
+        "name": "Maya Torres",
+        "email": "maya@example.test",
+        "tierId": "level-2",
+        "status": "Active"
+      },
+      {
+        "id": "jordan-lee",
+        "initials": "JL",
+        "name": "Jordan Lee",
+        "email": "jordan@example.test",
+        "tierId": "level-2",
+        "status": "Active"
+      },
+      {
+        "id": "avery-rivera",
+        "initials": "AR",
+        "name": "Avery Rivera",
+        "email": "avery@example.test",
+        "tierId": "level-1",
+        "status": "Active"
+      },
+      {
+        "id": "sam-kim",
+        "initials": "SK",
+        "name": "Sam Kim",
+        "email": "sam@example.test",
+        "tierId": "level-3",
+        "status": "Active"
+      },
+      {
+        "id": "devon-patel",
+        "initials": "DP",
+        "name": "Devon Patel",
+        "email": "devon@example.test",
+        "tierId": "level-3",
+        "status": "Active"
+      }
+    ],
+    "incentives": [
+      {
+        "id": "guest-pass",
+        "name": "Guest pass",
+        "threshold": 3,
+        "benefit": "One complimentary guest reservation",
+        "description": "A light, early-month reward for consistent participation."
+      },
+      {
+        "id": "membership-credit",
+        "name": "Membership credit",
+        "threshold": 5,
+        "benefit": "50% off next month’s membership",
+        "description": "The core participation target for the fictional Level 2 program."
+      },
+      {
+        "id": "facility-credit",
+        "name": "Facility credit",
+        "threshold": 8,
+        "benefit": "$40 facility credit",
+        "description": "Usable for reservations, clinics, or pro-shop purchases."
+      }
+    ],
     "playTypes": [
       {
         "id": "intro",
@@ -138,7 +203,7 @@
         "description": "Foundation classes and supervised open play.",
         "monthlyTargetPoints": 3,
         "rolloverCap": 3,
-        "achievement": "Level 2 review eligibility",
+        "achievement": "Foundation pathway complete",
         "allowedPlayTypeIds": [
           "intro",
           "skills-clinic",
@@ -156,7 +221,7 @@
         "description": "Core instruction, guided play, and curriculum delivery.",
         "monthlyTargetPoints": 5,
         "rolloverCap": 5,
-        "achievement": "50% membership credit",
+        "achievement": "Core instructor pathway complete",
         "allowedPlayTypeIds": [
           "intro",
           "skills-clinic",
@@ -180,7 +245,7 @@
         "description": "Advanced programs, competitive formats, and lead coverage.",
         "monthlyTargetPoints": 7,
         "rolloverCap": 7,
-        "achievement": "Lead instructor status",
+        "achievement": "Lead instructor pathway complete",
         "allowedPlayTypeIds": [
           "intro",
           "skills-clinic",
